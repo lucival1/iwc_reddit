@@ -43,7 +43,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = __importStar(require("express"));
-var joi = __importStar(require("joi"));
 var middleware_1 = require("../middleware/middleware");
 var validation_middleware_1 = require("../middleware/validation_middleware");
 var link_repository_1 = require("../repositories/link_repository");
@@ -204,21 +203,28 @@ function getLinkController() {
         }); })();
     });
     // HTTP POST http://localhost:8080/api/v1/links/:id/downvote
-    router.post("/:id/downvote", middleware_1.authMiddleware, function (req, res) {
+    router.post("/:id/downvote", validation_middleware_1.validateIds, middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var newMovie, result, movies;
+            var linkId, userId, voteToCast, voteData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        newMovie = req.body;
-                        result = joi.validate(req.body, linkDetailsSchema.newlink);
-                        if (!result.error) return [3 /*break*/, 1];
-                        res.status(400).send({ msg: "Movie is not valid!" });
-                        return [3 /*break*/, 3];
-                    case 1: return [4 /*yield*/, linkRepository.save(newMovie)];
+                        linkId = req.params.validId;
+                        userId = req.body.user_id;
+                        return [4 /*yield*/, voteChecker(linkId, userId, res)];
+                    case 1:
+                        voteToCast = _a.sent();
+                        if (!voteToCast) return [3 /*break*/, 3];
+                        // Default value is true so this needs to be reset to false on downvote
+                        voteToCast.value = false;
+                        return [4 /*yield*/, voteRepository.save(voteToCast)];
                     case 2:
-                        movies = _a.sent();
-                        res.json(movies);
+                        voteData = _a.sent();
+                        res.status(200)
+                            .json({
+                            message: "Vote casted",
+                            data: voteData
+                        });
                         _a.label = 3;
                     case 3: return [2 /*return*/];
                 }

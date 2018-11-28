@@ -1,11 +1,9 @@
 import * as express from "express";
-import * as joi from "joi";
 import {authMiddleware} from "../middleware/middleware";
 import {validateIds, validateNewLink} from "../middleware/validation_middleware";
 import {getLinkRepository} from "../repositories/link_repository";
 import {getCommentRepository} from "../repositories/comment_repository";
 import {getVoteRepository} from "../repositories/vote_repository";
-import {boolean, string} from "joi";
 
 export function getLinkController() {
 
@@ -115,21 +113,28 @@ export function getLinkController() {
                 res.status(200)
                     .json({
                         message: "Vote casted",
-                        data: voteData});
+                        data: voteData
+                    });
             }
         })();
     });
 
     // HTTP POST http://localhost:8080/api/v1/links/:id/downvote
-    router.post("/:id/downvote", authMiddleware, (req, res) => {
+    router.post("/:id/downvote", validateIds, authMiddleware, (req, res) => {
         (async () => {
-            const newMovie = req.body;
-            const result = joi.validate(req.body, linkDetailsSchema.newlink);
-            if (result.error) {
-                res.status(400).send({msg: "Movie is not valid!"});
-            } else {
-                const movies = await linkRepository.save(newMovie);
-                res.json(movies);
+            const linkId = req.params.validId;
+            const userId = req.body.user_id;
+            // Stores the vote to be casted
+            let voteToCast = await voteChecker(linkId, userId, res);
+            if (voteToCast) {
+                // Default value is true so this needs to be reset to false on downvote
+                voteToCast.value = false
+                const voteData = await voteRepository.save(voteToCast);
+                res.status(200)
+                    .json({
+                        message: "Vote casted",
+                        data: voteData
+                    });
             }
         })();
     });
