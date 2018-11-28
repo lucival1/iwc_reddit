@@ -140,21 +140,19 @@ function getLinkController() {
     // HTTP DELETE http://localhost:8080/api/v1/links/:id
     router.delete("/:id", validation_middleware_1.validateIds, middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var linkId, linkData, userId, linkRemoved;
+            var linkId, userId, linkData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
-                        if (!linkId) return [3 /*break*/, 6];
-                        return [4 /*yield*/, linkRepository.findOne(linkId)];
+                        userId = req.body.user_id;
+                        return [4 /*yield*/, linkChecker(linkId, userId, res)];
                     case 1:
                         linkData = _a.sent();
-                        if (!linkData) return [3 /*break*/, 5];
-                        userId = req.body.user_id;
                         if (!(linkData.user_id === userId)) return [3 /*break*/, 3];
                         return [4 /*yield*/, linkRepository.delete(linkId)];
                     case 2:
-                        linkRemoved = _a.sent();
+                        _a.sent();
                         res.status(200)
                             .json({
                             message: "Link deleted",
@@ -165,12 +163,7 @@ function getLinkController() {
                         res.status(401)
                             .json({ message: "User id " + userId + " can't delete this link" });
                         _a.label = 4;
-                    case 4: return [3 /*break*/, 6];
-                    case 5:
-                        res.status(404)
-                            .json({ message: "Link id " + linkId + " not found" });
-                        _a.label = 6;
-                    case 6: return [2 /*return*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         }); })();
@@ -234,6 +227,30 @@ function getLinkController() {
     return router;
 }
 exports.getLinkController = getLinkController;
+function linkChecker(linkId, userId, res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var linkRepository, linkData;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    linkRepository = link_repository_1.getLinkRepository();
+                    return [4 /*yield*/, linkRepository.findOne(linkId)];
+                case 1:
+                    linkData = _a.sent();
+                    if (linkData) {
+                        return [2 /*return*/, linkData];
+                    }
+                    else {
+                        // When link not found
+                        res.status(404)
+                            .json({ message: "Link ID " + linkId + " not found." })
+                            .send();
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
 function voteChecker(linkId, userId, res) {
     return __awaiter(this, void 0, void 0, function () {
         var linkRepository, voteRepository, link, voteCheck, newVote;

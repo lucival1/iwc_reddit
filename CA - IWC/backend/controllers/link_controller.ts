@@ -78,25 +78,18 @@ export function getLinkController() {
     router.delete("/:id", validateIds, authMiddleware, (req, res) => {
         (async () => {
             const linkId = req.params.validId;
-            if (linkId) {
-                const linkData = await linkRepository.findOne(linkId);
-                if (linkData) {
-                    const userId = req.body.user_id;
-                    if (linkData.user_id === userId) {
-                        const linkRemoved = await linkRepository.delete(linkId);
-                        res.status(200)
-                            .json({
-                                message: "Link deleted",
-                                data: linkData
-                            });
-                    } else {
-                        res.status(401)
-                            .json({message: `User id ${ userId } can't delete this link`});
-                    }
-                } else {
-                    res.status(404)
-                        .json({message: `Link id ${ linkId } not found`});
-                }
+            const userId = req.body.user_id;
+            let linkData = await linkChecker(linkId, userId, res);
+            if (linkData.user_id === userId) {
+                await linkRepository.delete(linkId);
+                res.status(200)
+                    .json({
+                        message: "Link deleted",
+                        data: linkData
+                    });
+            } else {
+                res.status(401)
+                    .json({message: `User id ${ userId } can't delete this link`});
             }
         })();
     });
@@ -142,6 +135,20 @@ export function getLinkController() {
     return router;
 }
 
+async function linkChecker(linkId: number, userId: number, res: any) {
+
+    const linkRepository = getLinkRepository();
+
+    const linkData = await linkRepository.findOne(linkId);
+    if (linkData) {
+        return linkData;
+    } else {
+        // When link not found
+        res.status(404)
+            .json({message: `Link ID ${linkId} not found.`})
+            .send();
+    }
+}
 async function voteChecker(linkId: number, userId: number, res: any) {
 
     // Create respositories so we can perform database operations
