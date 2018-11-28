@@ -18,8 +18,12 @@ export function getLinkController() {
     // HTTP GET http://localhost:8080/api/v1/links/
     router.get("/", (req, res) => {
         (async () => {
+            // Get all the links available
             const links = await linkRepository.find();
-            // Get all comments and check if the data exists, send proper answer
+
+            /* TO DO
+            Get all comments and votes */
+
             if (links) {
                 res.status(200)
                     .json(links);
@@ -34,20 +38,24 @@ export function getLinkController() {
     router.get("/:id", validateIds, (req, res) => {
         (async () => {
             const linkId = req.params.validId;
-            if (linkId) {
-                // Find the link and respond accordingly
-                const link = await linkRepository.findOne(linkId);
-                if (link) {
-                    // Get all the comments for the Link
-                    const comments = await commentRepository.find({link_id: linkId});
-                    // Create obj with link and comments
-                    const response = {link, comments};
-                    res.status(200)
-                        .json(response);
-                } else {
-                    res.status(404)
-                        .json({message: `Link id ${ linkId } not found`});
-                }
+            // Check if it is real and stores the link to data
+            const link = await linkChecker(linkId, res);
+
+            /* TO DO
+           Get all votes */
+
+
+            // If link exists continue
+            if (link) {
+                // Get all the comments for the Link
+                const comments = await commentRepository.find({link_id: linkId});
+                // Create obj with link and comments
+                const response = {link, comments};
+                res.status(200)
+                    .json(response);
+            } else {
+                res.status(404)
+                    .json({message: `Link id ${ linkId } not found`});
             }
         })();
     });
@@ -58,7 +66,8 @@ export function getLinkController() {
             const newLink = req.body;
             // Tell is the data sent is valid
             const validLink = (req as any).validNewLink;
-            // if data is valid posts new Link
+
+            // If data is valid save new Link
             if (validLink) {
                 const linkData = await linkRepository.save(newLink);
                 res.status(200)
@@ -79,7 +88,11 @@ export function getLinkController() {
         (async () => {
             const linkId = req.params.validId;
             const userId = req.body.user_id;
-            let linkData = await linkChecker(linkId, userId, res);
+
+            // Check if it is real and stores the link to data
+            const linkData = await linkChecker(linkId, res);
+
+            // If user from client matches with link owner continue otherwise respond accordingly
             if (linkData.user_id === userId) {
                 await linkRepository.delete(linkId);
                 res.status(200)
@@ -99,8 +112,13 @@ export function getLinkController() {
         (async () => {
             const linkId = req.params.validId;
             const userId = req.body.user_id;
+
+            // Check if it is real and stores the link to data
+            const linkData = await linkChecker(linkId, res);
             // Stores the vote to be casted
-            let voteToCast = await voteChecker(linkId, userId, res);
+            const voteToCast = await voteChecker(linkData.link_id, userId, res);
+
+            // If voteToCast exists call the repository and send response
             if (voteToCast) {
                 const voteData = await voteRepository.save(voteToCast);
                 res.status(200)
@@ -117,8 +135,13 @@ export function getLinkController() {
         (async () => {
             const linkId = req.params.validId;
             const userId = req.body.user_id;
+
+            // Check if it is real and stores the link to data
+            const linkData = await linkChecker(linkId, res);
             // Stores the vote to be casted
-            let voteToCast = await voteChecker(linkId, userId, res);
+            let voteToCast = await voteChecker(linkData.link_id, userId, res);
+
+            // If voteToCast exists call the repository and send response
             if (voteToCast) {
                 // Default value is true so this needs to be reset to false on downvote
                 voteToCast.value = false
@@ -135,13 +158,17 @@ export function getLinkController() {
     return router;
 }
 
-async function linkChecker(linkId: number, userId: number, res: any) {
 
+async function linkChecker(linkId: number, res: any) {
+
+    // Prepare vote repository and fetch data
     const linkRepository = getLinkRepository();
+    const linkExists = await linkRepository.findOne(linkId);
 
-    const linkData = await linkRepository.findOne(linkId);
-    if (linkData) {
-        return linkData;
+    // Check if link is real
+    if (linkExists) {
+        return linkExists;
+
     } else {
         // When link not found
         res.status(404)
@@ -149,44 +176,37 @@ async function linkChecker(linkId: number, userId: number, res: any) {
             .send();
     }
 }
+
+
 async function voteChecker(linkId: number, userId: number, res: any) {
 
-    // Create respositories so we can perform database operations
-    const linkRepository = getLinkRepository();
+    // Prepare vote repository and fetch data
     const voteRepository = getVoteRepository();
+    const voteExists = await voteRepository.findOne({link_id: linkId, user_id: userId});
 
-    const link = await linkRepository.findOne(linkId);
-    if (link) {
-        // Check if user has voted the link before
-        const voteCheck = await voteRepository.findOne({link_id: linkId, user_id: userId});
-        if (voteCheck) {
-            // When user has already voted the link
-            res.status(400)
-                .json({
-                    message: "User already has casted a vote.",
-                    data: voteCheck
-                })
-                .send();
-        } else {
-            // Set new vote object, default value is true, needs to be changed to false for downvote route
-            const newVote: {
-                user_id: number,
-                link_id: number,
-                value: boolean
-            } = {
-                user_id: userId,
-                link_id: link.link_id,
-                value: true
-            };
-
-            // Returns the vote object
-            return newVote;
-        }
-    } else {
-        // When link not found
-        res.status(404)
-            .json({message: `Link ID ${linkId} not found.`})
+    // Check if user has voted the link before
+    if (voteExists) {
+        // When user has already voted
+        res.status(400)
+            .json({
+                message: "User already has casted a vote.",
+                data: voteExists
+            })
             .send();
+
+    } else {
+        // Set new vote entity, default value is true, downvote route needs to be change to false
+        const newVote: {
+            user_id: number,
+            link_id: number,
+            value: boolean
+        } = {
+            user_id: userId,
+            link_id: linkId,
+            value: true
+        };
+
+        return newVote;
     }
 
 }

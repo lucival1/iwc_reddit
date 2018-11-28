@@ -65,7 +65,8 @@ function getLinkController() {
                     case 0: return [4 /*yield*/, linkRepository.find()];
                     case 1:
                         links = _a.sent();
-                        // Get all comments and check if the data exists, send proper answer
+                        /* TO DO
+                        Get all comments and votes */
                         if (links) {
                             res.status(200)
                                 .json(links);
@@ -87,8 +88,7 @@ function getLinkController() {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
-                        if (!linkId) return [3 /*break*/, 4];
-                        return [4 /*yield*/, linkRepository.findOne(linkId)];
+                        return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
                         link = _a.sent();
                         if (!link) return [3 /*break*/, 3];
@@ -146,7 +146,7 @@ function getLinkController() {
                     case 0:
                         linkId = req.params.validId;
                         userId = req.body.user_id;
-                        return [4 /*yield*/, linkChecker(linkId, userId, res)];
+                        return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
                         linkData = _a.sent();
                         if (!(linkData.user_id === userId)) return [3 /*break*/, 3];
@@ -171,26 +171,29 @@ function getLinkController() {
     // HTTP POST http://localhost:8080/api/v1/links/:id/upvote
     router.post("/:id/upvote", validation_middleware_1.validateIds, middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var linkId, userId, voteToCast, voteData;
+            var linkId, userId, linkData, voteToCast, voteData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
                         userId = req.body.user_id;
-                        return [4 /*yield*/, voteChecker(linkId, userId, res)];
+                        return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
-                        voteToCast = _a.sent();
-                        if (!voteToCast) return [3 /*break*/, 3];
-                        return [4 /*yield*/, voteRepository.save(voteToCast)];
+                        linkData = _a.sent();
+                        return [4 /*yield*/, voteChecker(linkData.link_id, userId, res)];
                     case 2:
+                        voteToCast = _a.sent();
+                        if (!voteToCast) return [3 /*break*/, 4];
+                        return [4 /*yield*/, voteRepository.save(voteToCast)];
+                    case 3:
                         voteData = _a.sent();
                         res.status(200)
                             .json({
                             message: "Vote casted",
                             data: voteData
                         });
-                        _a.label = 3;
-                    case 3: return [2 /*return*/];
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
                 }
             });
         }); })();
@@ -198,28 +201,31 @@ function getLinkController() {
     // HTTP POST http://localhost:8080/api/v1/links/:id/downvote
     router.post("/:id/downvote", validation_middleware_1.validateIds, middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var linkId, userId, voteToCast, voteData;
+            var linkId, userId, linkData, voteToCast, voteData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
                         userId = req.body.user_id;
-                        return [4 /*yield*/, voteChecker(linkId, userId, res)];
+                        return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
+                        linkData = _a.sent();
+                        return [4 /*yield*/, voteChecker(linkData.link_id, userId, res)];
+                    case 2:
                         voteToCast = _a.sent();
-                        if (!voteToCast) return [3 /*break*/, 3];
+                        if (!voteToCast) return [3 /*break*/, 4];
                         // Default value is true so this needs to be reset to false on downvote
                         voteToCast.value = false;
                         return [4 /*yield*/, voteRepository.save(voteToCast)];
-                    case 2:
+                    case 3:
                         voteData = _a.sent();
                         res.status(200)
                             .json({
                             message: "Vote casted",
                             data: voteData
                         });
-                        _a.label = 3;
-                    case 3: return [2 /*return*/];
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
                 }
             });
         }); })();
@@ -227,18 +233,19 @@ function getLinkController() {
     return router;
 }
 exports.getLinkController = getLinkController;
-function linkChecker(linkId, userId, res) {
+function linkChecker(linkId, res) {
     return __awaiter(this, void 0, void 0, function () {
-        var linkRepository, linkData;
+        var linkRepository, linkExists;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     linkRepository = link_repository_1.getLinkRepository();
                     return [4 /*yield*/, linkRepository.findOne(linkId)];
                 case 1:
-                    linkData = _a.sent();
-                    if (linkData) {
-                        return [2 /*return*/, linkData];
+                    linkExists = _a.sent();
+                    // Check if link is real
+                    if (linkExists) {
+                        return [2 /*return*/, linkExists];
                     }
                     else {
                         // When link not found
@@ -253,45 +260,33 @@ function linkChecker(linkId, userId, res) {
 }
 function voteChecker(linkId, userId, res) {
     return __awaiter(this, void 0, void 0, function () {
-        var linkRepository, voteRepository, link, voteCheck, newVote;
+        var voteRepository, voteExists, newVote;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    linkRepository = link_repository_1.getLinkRepository();
                     voteRepository = vote_repository_1.getVoteRepository();
-                    return [4 /*yield*/, linkRepository.findOne(linkId)];
-                case 1:
-                    link = _a.sent();
-                    if (!link) return [3 /*break*/, 3];
                     return [4 /*yield*/, voteRepository.findOne({ link_id: linkId, user_id: userId })];
-                case 2:
-                    voteCheck = _a.sent();
-                    if (voteCheck) {
-                        // When user has already voted the link
+                case 1:
+                    voteExists = _a.sent();
+                    // Check if user has voted the link before
+                    if (voteExists) {
+                        // When user has already voted
                         res.status(400)
                             .json({
                             message: "User already has casted a vote.",
-                            data: voteCheck
+                            data: voteExists
                         })
                             .send();
                     }
                     else {
                         newVote = {
                             user_id: userId,
-                            link_id: link.link_id,
+                            link_id: linkId,
                             value: true
                         };
-                        // Returns the vote object
                         return [2 /*return*/, newVote];
                     }
-                    return [3 /*break*/, 4];
-                case 3:
-                    // When link not found
-                    res.status(404)
-                        .json({ message: "Link ID " + linkId + " not found." })
-                        .send();
-                    _a.label = 4;
-                case 4: return [2 /*return*/];
+                    return [2 /*return*/];
             }
         });
     });
