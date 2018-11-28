@@ -179,25 +179,26 @@ function getLinkController() {
     // HTTP POST http://localhost:8080/api/v1/links/:id/upvote
     router.post("/:id/upvote", validation_middleware_1.validateIds, middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var linkId, link, newVote, linkData;
+            var linkId, userId, voteToCast, voteData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
-                        if (!linkId) return [3 /*break*/, 3];
-                        return [4 /*yield*/, linkRepository.findOne(linkId)];
+                        userId = req.body.user_id;
+                        return [4 /*yield*/, voteChecker(linkId, userId, res)];
                     case 1:
-                        link = _a.sent();
-                        newVote = req.params.validId;
-                        return [4 /*yield*/, voteRepository.save(newVote)];
+                        voteToCast = _a.sent();
+                        if (!voteToCast) return [3 /*break*/, 3];
+                        return [4 /*yield*/, voteRepository.save(voteToCast)];
                     case 2:
-                        linkData = _a.sent();
-                        res.json();
-                        return [3 /*break*/, 4];
-                    case 3:
-                        res.status(400).send({ msg: "Movie is not valid!" });
-                        _a.label = 4;
-                    case 4: return [2 /*return*/];
+                        voteData = _a.sent();
+                        res.status(200)
+                            .json({
+                            message: "Vote casted",
+                            data: voteData
+                        });
+                        _a.label = 3;
+                    case 3: return [2 /*return*/];
                 }
             });
         }); })();
@@ -227,3 +228,48 @@ function getLinkController() {
     return router;
 }
 exports.getLinkController = getLinkController;
+function voteChecker(linkId, userId, res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var linkRepository, voteRepository, link, voteCheck, newVote;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    linkRepository = link_repository_1.getLinkRepository();
+                    voteRepository = vote_repository_1.getVoteRepository();
+                    return [4 /*yield*/, linkRepository.findOne(linkId)];
+                case 1:
+                    link = _a.sent();
+                    if (!link) return [3 /*break*/, 3];
+                    return [4 /*yield*/, voteRepository.findOne({ link_id: linkId, user_id: userId })];
+                case 2:
+                    voteCheck = _a.sent();
+                    if (voteCheck) {
+                        // When user has already voted the link
+                        res.status(400)
+                            .json({
+                            message: "User already has casted a vote.",
+                            data: voteCheck
+                        })
+                            .send();
+                    }
+                    else {
+                        newVote = {
+                            user_id: userId,
+                            link_id: link.link_id,
+                            value: true
+                        };
+                        // Returns the vote object
+                        return [2 /*return*/, newVote];
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    // When link not found
+                    res.status(404)
+                        .json({ message: "Link ID " + linkId + " not found." })
+                        .send();
+                    _a.label = 4;
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+}

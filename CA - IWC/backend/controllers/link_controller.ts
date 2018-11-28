@@ -5,6 +5,7 @@ import {validateIds, validateNewLink} from "../middleware/validation_middleware"
 import {getLinkRepository} from "../repositories/link_repository";
 import {getCommentRepository} from "../repositories/comment_repository";
 import {getVoteRepository} from "../repositories/vote_repository";
+import {boolean, string} from "joi";
 
 export function getLinkController() {
 
@@ -106,13 +107,15 @@ export function getLinkController() {
     router.post("/:id/upvote", validateIds, authMiddleware, (req, res) => {
         (async () => {
             const linkId = req.params.validId;
-            if (linkId) {
-                const link = await linkRepository.findOne(linkId);
-                const newVote = req.params.validId;
-                const linkData = await voteRepository.save(newVote);
-                res.json();
-            } else {
-                res.status(400).send({msg: "Movie is not valid!"});
+            const userId = req.body.user_id;
+            // Stores the vote to be casted
+            let voteToCast = await voteChecker(linkId, userId, res);
+            if (voteToCast) {
+                const voteData = await voteRepository.save(voteToCast);
+                res.status(200)
+                    .json({
+                        message: "Vote casted",
+                        data: voteData});
             }
         })();
     });
@@ -132,4 +135,46 @@ export function getLinkController() {
     });
 
     return router;
+}
+
+async function voteChecker(linkId: number, userId: number, res: any) {
+
+    // Create respositories so we can perform database operations
+    const linkRepository = getLinkRepository();
+    const voteRepository = getVoteRepository();
+
+    const link = await linkRepository.findOne(linkId);
+    if (link) {
+        // Check if user has voted the link before
+        const voteCheck = await voteRepository.findOne({link_id: linkId, user_id: userId});
+        if (voteCheck) {
+            // When user has already voted the link
+            res.status(400)
+                .json({
+                    message: "User already has casted a vote.",
+                    data: voteCheck
+                })
+                .send();
+        } else {
+            // Set new vote object, default value is true, needs to be changed to false for downvote route
+            const newVote: {
+                user_id: number,
+                link_id: number,
+                value: boolean
+            } = {
+                user_id: userId,
+                link_id: link.link_id,
+                value: true
+            };
+
+            // Returns the vote object
+            return newVote;
+        }
+    } else {
+        // When link not found
+        res.status(404)
+            .json({message: `Link ID ${linkId} not found.`})
+            .send();
+    }
+
 }
