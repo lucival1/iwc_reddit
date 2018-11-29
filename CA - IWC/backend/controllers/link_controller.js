@@ -56,7 +56,7 @@ function getLinkController() {
     var voteRepository = vote_repository_1.getVoteRepository();
     // Create router instance so we can declare endpoints
     var router = express.Router();
-    // HTTP GET http://localhost:8080/api/v1/links/
+    // HTTP GET http://localhost:8080/api/v1/links
     router.get("/", function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
             var links, response, _a, _b, _i, i, linkData, votesData;

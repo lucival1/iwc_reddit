@@ -15,7 +15,7 @@ export function getLinkController() {
     // Create router instance so we can declare endpoints
     const router = express.Router();
 
-    // HTTP GET http://localhost:8080/api/v1/links/
+    // HTTP GET http://localhost:8080/api/v1/links
     router.get("/", (req, res) => {
         (async () => {
             // Get all the links available
