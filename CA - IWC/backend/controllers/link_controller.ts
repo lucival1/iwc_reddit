@@ -48,13 +48,9 @@ export function getLinkController() {
     // HTTP GET http://localhost:8080/api/v1/links/:id
     router.get("/:id", validateIds, (req, res) => {
         (async () => {
-            const linkId = req.params.validId;
+            const linkId: number = req.params.validId;
             // Check if it is real and stores the link to data
             const link = await linkChecker(linkId, res);
-
-            /* TO DO
-           Get all votes */
-
 
             // If link exists continue
             if (link) {
@@ -101,8 +97,8 @@ export function getLinkController() {
     // HTTP DELETE http://localhost:8080/api/v1/links/:id
     router.delete("/:id", validateIds, authMiddleware, (req, res) => {
         (async () => {
-            const linkId = req.params.validId;
-            const userId = req.body.user_id;
+            const linkId: number = req.params.validId;
+            const userId: number = req.body.user_id;
 
             // Check if it is real and stores the link to data
             const linkData: any = await linkChecker(linkId, res);
@@ -126,8 +122,8 @@ export function getLinkController() {
     // HTTP POST http://localhost:8080/api/v1/links/:id/upvote
     router.post("/:id/upvote", validateIds, authMiddleware, (req, res) => {
         (async () => {
-            const linkId = req.params.validId;
-            const userId = req.body.user_id;
+            const linkId: number = req.params.validId;
+            const userId: number = req.body.user_id;
 
             // Check if it is real and stores the link to data
             const linkData: any = await linkChecker(linkId, res);
@@ -150,8 +146,8 @@ export function getLinkController() {
     // HTTP POST http://localhost:8080/api/v1/links/:id/downvote
     router.post("/:id/downvote", validateIds, authMiddleware, (req, res) => {
         (async () => {
-            const linkId = req.params.validId;
-            const userId = req.body.user_id;
+            const linkId: number = req.params.validId;
+            const userId: number = req.body.user_id;
 
             // Check if it is real and stores the link to data
             const linkData: any = await linkChecker(linkId, res);
