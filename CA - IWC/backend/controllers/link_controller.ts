@@ -1,5 +1,5 @@
 import * as express from "express";
-import { authMiddleware } from "../middleware/middleware";
+import { authMiddleware } from "../middleware/auth_middleware";
 import { validateIds, validateNewLink } from "../middleware/validation_middleware";
 import { getLinkRepository } from "../repositories/link_repository";
 import { getCommentRepository } from "../repositories/comment_repository";

@@ -43,7 +43,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = __importStar(require("express"));
-var middleware_1 = require("../middleware/middleware");
+var auth_middleware_1 = require("../middleware/auth_middleware");
 var validation_middleware_1 = require("../middleware/validation_middleware");
 var link_repository_1 = require("../repositories/link_repository");
 var comment_repository_1 = require("../repositories/comment_repository");
@@ -128,7 +128,7 @@ function getLinkController() {
         }); })();
     });
     // HTTP POST http://localhost:8080/api/v1/links
-    router.post("/", validation_middleware_1.validateNewLink, middleware_1.authMiddleware, function (req, res) {
+    router.post("/", validation_middleware_1.validateNewLink, auth_middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
             var newLink, validLink, linkData;
             return __generator(this, function (_a) {
@@ -157,7 +157,7 @@ function getLinkController() {
         }); })();
     });
     // HTTP DELETE http://localhost:8080/api/v1/links/:id
-    router.delete("/:id", validation_middleware_1.validateIds, middleware_1.authMiddleware, function (req, res) {
+    router.delete("/:id", validation_middleware_1.validateIds, auth_middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
             var linkId, userId, linkData;
             return __generator(this, function (_a) {
@@ -188,7 +188,7 @@ function getLinkController() {
         }); })();
     });
     // HTTP POST http://localhost:8080/api/v1/links/:id/upvote
-    router.post("/:id/upvote", validation_middleware_1.validateIds, middleware_1.authMiddleware, function (req, res) {
+    router.post("/:id/upvote", validation_middleware_1.validateIds, auth_middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
             var linkId, userId, linkData, voteToCast, voteData;
             return __generator(this, function (_a) {
@@ -218,7 +218,7 @@ function getLinkController() {
         }); })();
     });
     // HTTP POST http://localhost:8080/api/v1/links/:id/downvote
-    router.post("/:id/downvote", validation_middleware_1.validateIds, middleware_1.authMiddleware, function (req, res) {
+    router.post("/:id/downvote", validation_middleware_1.validateIds, auth_middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
             var linkId, userId, linkData, voteToCast, voteData;
             return __generator(this, function (_a) {
