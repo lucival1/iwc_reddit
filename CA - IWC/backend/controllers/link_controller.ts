@@ -7,12 +7,12 @@ import { getVoteRepository } from "../repositories/vote_repository";
 
 export function getLinkController() {
 
-    // Create respositories so we can perform database operations
+    // Prepare repositories
     const linkRepository = getLinkRepository();
     const commentRepository = getCommentRepository();
     const voteRepository = getVoteRepository();
 
-    // Create router instance so we can declare enpoints
+    // Create router instance so we can declare endpoints
     const router = express.Router();
 
     // HTTP GET http://localhost:8080/api/v1/links/
@@ -174,7 +174,7 @@ export function getLinkController() {
 
 async function linkChecker(linkId: number, res: any) {
 
-    // Prepare vote repository and fetch data
+    // Prepare link repository and fetch data
     const linkRepository = getLinkRepository();
     const linkExists = await linkRepository.findOne(linkId);
 

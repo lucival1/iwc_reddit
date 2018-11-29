@@ -50,11 +50,11 @@ var comment_repository_1 = require("../repositories/comment_repository");
 var vote_repository_1 = require("../repositories/vote_repository");
 function getLinkController() {
     var _this = this;
-    // Create respositories so we can perform database operations
+    // Prepare repositories
     var linkRepository = link_repository_1.getLinkRepository();
     var commentRepository = comment_repository_1.getCommentRepository();
     var voteRepository = vote_repository_1.getVoteRepository();
-    // Create router instance so we can declare enpoints
+    // Create router instance so we can declare endpoints
     var router = express.Router();
     // HTTP GET http://localhost:8080/api/v1/links/
     router.get("/", function (req, res) {
