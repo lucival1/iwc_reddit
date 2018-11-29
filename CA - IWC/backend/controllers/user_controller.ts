@@ -1,68 +1,69 @@
 import * as express from "express";
 import { getUserRepository } from "../repositories/user_repository";
-import * as joi from "joi";
+import { validateIds, validateNewUser } from "../middleware/validation_middleware";
+import { getLinkRepository } from "../repositories/link_repository";
+import { getCommentRepository } from "../repositories/comment_repository";
 
 export function getUserController() {
 
+    // Prepare repositories
     const userRepository = getUserRepository();
+    const linkRepository = getLinkRepository();
+    const commentRepository = getCommentRepository();
+
+    // Create router instance so we can declare endpoints
     const router = express.Router();
 
-    // userDetailsSchema can store different schemas
-    const userDetailsSchema = {
-        userId: {
-            id: joi.number()
-        },
-        newUser: {
-            email: joi.string().email(),
-            password: joi.string()
-        }
-    };
-
-    // HTTP POST http://localhost:8080/api/v1/users/
-    router.post("/", (req, res) => {
+    // HTTP POST http://localhost:8080/api/v1/users
+    router.post("/", validateNewUser, (req, res) => {
         (async () => {
+            // After the validation stores new user data
             const newUser = req.body;
-            const result = joi.validate(newUser, userDetailsSchema.newUser);
-            if (result.error) {
-                res.status(400)
-                    .json({ message: `Invalid entry.` })
+            // Check if user exists
+            const userData = await userRepository.findOne( { email: newUser.email });
+
+            // If user does not exists, create a new one
+            if (!userData) {
+                // Create new user
+                const user = await userRepository.save(newUser);
+
+                res.status(200)
+                    .json({ userData: user })
                     .send();
             } else {
-                const userEmail = req.body.email;
-                const userData = await userRepository.findOne( { email: userEmail });
-                if (userData) {
-                    res.status(400)
-                        .json({ message: `Email ${ userEmail } already in use.` })
-                        .send();
-                } else {
-                    const user = await userRepository.save(newUser);
-                    res.status(200)
-                        .json({ user: user })
-                        .send();
-                }
+                res.status(400)
+                    .json({ message: `Email ${ newUser.email } already in use.` })
+                    .send();
             }
         })();
     });
 
+
     // HTTP GET http://localhost:8080/api/v1/users/:id
-    router.get("/:userId", (req, res) => {
+    router.get("/:id", validateIds, (req, res) => {
         (async () => {
-            const userId = req.params.userId;
-            const result = joi.validate(userId, userDetailsSchema.userId.id);
-            if (result.error) {
-                res.status(400)
-                    .json({ message: `Invalid entry.`, error: result.error })
-                    .send();
+            // Get valid ID from validation service
+            const userId: number = req.params.validId;
+            // Fetch user data
+            const userData = await userRepository.findOne(userId);
+
+            // If user is real, return all the related data
+            if (userData) {
+                // Fetch user links
+                const links = await linkRepository.find({ user_id: userId });
+                // Fetch user comments
+                const comments = await commentRepository.find({ user_id: userId });
+
+                res.status(200)
+                    .json({
+                        userData,
+                        links,
+                        comments
+                    });
             } else {
-                const userData = await userRepository.findOne(userId);
-                if (userData) {
-                    res.status(200)
-                        .json(userData);
-                } else {
-                    res.status(404)
-                        .json({ message: `User id ${ userId } not found.` })
-                        .send();
-                }
+                res.status(404)
+                    .json({ message: `User id ${ userId } not found.` })
+                    .send();
             }
         })();
     });
