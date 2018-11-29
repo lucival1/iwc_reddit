@@ -43,7 +43,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = __importStar(require("express"));
-var joi = __importStar(require("joi"));
 var middleware_1 = require("../middleware/middleware");
 var validation_middleware_1 = require("../middleware/validation_middleware");
 var link_repository_1 = require("../repositories/link_repository");
@@ -51,25 +50,45 @@ var comment_repository_1 = require("../repositories/comment_repository");
 var vote_repository_1 = require("../repositories/vote_repository");
 function getLinkController() {
     var _this = this;
-    // Create respositories so we can perform database operations
+    // Prepare repositories
     var linkRepository = link_repository_1.getLinkRepository();
     var commentRepository = comment_repository_1.getCommentRepository();
     var voteRepository = vote_repository_1.getVoteRepository();
-    // Create router instance so we can declare enpoints
+    // Create router instance so we can declare endpoints
     var router = express.Router();
-    // HTTP GET http://localhost:8080/api/v1/links/
+    // HTTP GET http://localhost:8080/api/v1/links
     router.get("/", function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var links;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var links, response, _a, _b, _i, i, linkData, votesData;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0: return [4 /*yield*/, linkRepository.find()];
                     case 1:
-                        links = _a.sent();
-                        // Get all comments and check if the data exists, send proper answer
+                        links = _c.sent();
+                        response = {};
+                        _a = [];
+                        for (_b in links)
+                            _a.push(_b);
+                        _i = 0;
+                        _c.label = 2;
+                    case 2:
+                        if (!(_i < _a.length)) return [3 /*break*/, 5];
+                        i = _a[_i];
+                        linkData = links[i];
+                        return [4 /*yield*/, voteRepository.find({ link_id: links[i].link_id })];
+                    case 3:
+                        votesData = _c.sent();
+                        //response[i] = { link: { linkData, comments: commentsData, votes: votesData }};
+                        response[i] = { link: { linkData: linkData, votes: votesData } };
+                        _c.label = 4;
+                    case 4:
+                        _i++;
+                        return [3 /*break*/, 2];
+                    case 5:
+                        // After everything is processed return to client.
                         if (links) {
                             res.status(200)
-                                .json(links);
+                                .json(response);
                         }
                         else {
                             res.status(404)
@@ -88,8 +107,7 @@ function getLinkController() {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
-                        if (!linkId) return [3 /*break*/, 4];
-                        return [4 /*yield*/, linkRepository.findOne(linkId)];
+                        return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
                         link = _a.sent();
                         if (!link) return [3 /*break*/, 3];
@@ -141,21 +159,19 @@ function getLinkController() {
     // HTTP DELETE http://localhost:8080/api/v1/links/:id
     router.delete("/:id", validation_middleware_1.validateIds, middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var linkId, linkData, userId, linkRemoved;
+            var linkId, userId, linkData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
-                        if (!linkId) return [3 /*break*/, 6];
-                        return [4 /*yield*/, linkRepository.findOne(linkId)];
+                        userId = req.body.user_id;
+                        return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
                         linkData = _a.sent();
-                        if (!linkData) return [3 /*break*/, 5];
-                        userId = req.body.user_id;
                         if (!(linkData.user_id === userId)) return [3 /*break*/, 3];
                         return [4 /*yield*/, linkRepository.delete(linkId)];
                     case 2:
-                        linkRemoved = _a.sent();
+                        _a.sent();
                         res.status(200)
                             .json({
                             message: "Link deleted",
@@ -166,12 +182,7 @@ function getLinkController() {
                         res.status(401)
                             .json({ message: "User id " + userId + " can't delete this link" });
                         _a.label = 4;
-                    case 4: return [3 /*break*/, 6];
-                    case 5:
-                        res.status(404)
-                            .json({ message: "Link id " + linkId + " not found" });
-                        _a.label = 6;
-                    case 6: return [2 /*return*/];
+                    case 4: return [2 /*return*/];
                 }
             });
         }); })();
@@ -179,23 +190,27 @@ function getLinkController() {
     // HTTP POST http://localhost:8080/api/v1/links/:id/upvote
     router.post("/:id/upvote", validation_middleware_1.validateIds, middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var linkId, link, newVote, linkData;
+            var linkId, userId, linkData, voteToCast, voteData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
-                        if (!linkId) return [3 /*break*/, 3];
-                        return [4 /*yield*/, linkRepository.findOne(linkId)];
+                        userId = req.body.user_id;
+                        return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
-                        link = _a.sent();
-                        newVote = req.params.validId;
-                        return [4 /*yield*/, voteRepository.save(newVote)];
-                    case 2:
                         linkData = _a.sent();
-                        res.json();
-                        return [3 /*break*/, 4];
+                        return [4 /*yield*/, voteChecker(linkData.link_id, userId, res)];
+                    case 2:
+                        voteToCast = _a.sent();
+                        if (!voteToCast) return [3 /*break*/, 4];
+                        return [4 /*yield*/, voteRepository.save(voteToCast)];
                     case 3:
-                        res.status(400).send({ msg: "Movie is not valid!" });
+                        voteData = _a.sent();
+                        res.status(200)
+                            .json({
+                            message: "Vote casted",
+                            data: voteData
+                        });
                         _a.label = 4;
                     case 4: return [2 /*return*/];
                 }
@@ -203,23 +218,33 @@ function getLinkController() {
         }); })();
     });
     // HTTP POST http://localhost:8080/api/v1/links/:id/downvote
-    router.post("/:id/downvote", middleware_1.authMiddleware, function (req, res) {
+    router.post("/:id/downvote", validation_middleware_1.validateIds, middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var newMovie, result, movies;
+            var linkId, userId, linkData, voteToCast, voteData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        newMovie = req.body;
-                        result = joi.validate(req.body, linkDetailsSchema.newlink);
-                        if (!result.error) return [3 /*break*/, 1];
-                        res.status(400).send({ msg: "Movie is not valid!" });
-                        return [3 /*break*/, 3];
-                    case 1: return [4 /*yield*/, linkRepository.save(newMovie)];
+                        linkId = req.params.validId;
+                        userId = req.body.user_id;
+                        return [4 /*yield*/, linkChecker(linkId, res)];
+                    case 1:
+                        linkData = _a.sent();
+                        return [4 /*yield*/, voteChecker(linkData.link_id, userId, res)];
                     case 2:
-                        movies = _a.sent();
-                        res.json(movies);
-                        _a.label = 3;
-                    case 3: return [2 /*return*/];
+                        voteToCast = _a.sent();
+                        if (!voteToCast) return [3 /*break*/, 4];
+                        // Default value is true so this needs to be reset to false on downvote
+                        voteToCast.value = false;
+                        return [4 /*yield*/, voteRepository.save(voteToCast)];
+                    case 3:
+                        voteData = _a.sent();
+                        res.status(200)
+                            .json({
+                            message: "Vote casted",
+                            data: voteData
+                        });
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
                 }
             });
         }); })();
@@ -227,3 +252,61 @@ function getLinkController() {
     return router;
 }
 exports.getLinkController = getLinkController;
+function linkChecker(linkId, res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var linkRepository, linkExists;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    linkRepository = link_repository_1.getLinkRepository();
+                    return [4 /*yield*/, linkRepository.findOne(linkId)];
+                case 1:
+                    linkExists = _a.sent();
+                    // Check if link is real
+                    if (linkExists) {
+                        return [2 /*return*/, linkExists];
+                    }
+                    else {
+                        // When link not found
+                        res.status(404)
+                            .json({ message: "Link ID " + linkId + " not found." })
+                            .send();
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function voteChecker(linkId, userId, res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var voteRepository, voteExists, newVote;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    voteRepository = vote_repository_1.getVoteRepository();
+                    return [4 /*yield*/, voteRepository.findOne({ link_id: linkId, user_id: userId })];
+                case 1:
+                    voteExists = _a.sent();
+                    // Check if user has voted the link before
+                    if (voteExists) {
+                        // When user has already voted
+                        res.status(400)
+                            .json({
+                            message: "User already has casted a vote.",
+                            data: voteExists
+                        })
+                            .send();
+                    }
+                    else {
+                        newVote = {
+                            user_id: userId,
+                            link_id: linkId,
+                            value: true
+                        };
+                        return [2 /*return*/, newVote];
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
