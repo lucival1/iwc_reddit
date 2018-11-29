@@ -11,9 +11,9 @@ export function validateIds(
     const idDetailsSchema = {
         idFormat: joi.number()
     };
-
     const idToCheck = req.params.id;
     const result = joi.validate(idToCheck, idDetailsSchema.idFormat);
+
     // If the id has a valid format calls next otherwise sends 400
     if (result.error) {
         res.status(400)
@@ -23,6 +23,37 @@ export function validateIds(
         (req as any).params.validId = idToCheck;
         next();
     }
+}
+
+export function validateNewUser(
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+) {
+    // defines newLink requirements
+    const newUserSchema = {
+        email: joi.string().email(),
+        password: joi.string()
+    };
+    const newUser = req.body;
+
+    // check if title and url params are defined datatype
+    if (newUser.email != undefined && newUser.password != undefined) {
+        const result = joi.validate(newUser, newUserSchema);
+
+        // If the Params are valid call next otherwise sends status 400
+        if (result.error) {
+            res.status(400)
+                .json({message: 'Invalid entries.'})
+                .send();
+        } else {
+            next();
+        }
+    } else {
+        res.status(400)
+            .json({message: "Invalid entries."});
+    }
+
 }
 
 export function validateNewLink(
@@ -35,11 +66,12 @@ export function validateNewLink(
         title: joi.string(),
         url: joi.string()
     };
-
     const newLink = req.body;
+
     // check if title and url params are defined datatype
     if (newLink.title != undefined && newLink.url != undefined) {
         const result = joi.validate(newLink, newLinkSchema);
+
         // If the Params are valid call next otherwise sends status 400
         if (result.error) {
             res.status(400)
