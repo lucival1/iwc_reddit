@@ -44,85 +44,77 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = __importStar(require("express"));
 var user_repository_1 = require("../repositories/user_repository");
-var joi = __importStar(require("joi"));
+var validation_middleware_1 = require("../middleware/validation_middleware");
+var link_repository_1 = require("../repositories/link_repository");
+var comment_repository_1 = require("../repositories/comment_repository");
 function getUserController() {
     var _this = this;
+    // Prepare repositories
     var userRepository = user_repository_1.getUserRepository();
+    var linkRepository = link_repository_1.getLinkRepository();
+    var commentRepository = comment_repository_1.getCommentRepository();
+    // Create router instance so we can declare endpoints
     var router = express.Router();
-    // userDetailsSchema can store different schemas
-    var userDetailsSchema = {
-        userId: {
-            id: joi.number()
-        },
-        newUser: {
-            email: joi.string().email(),
-            password: joi.string()
-        }
-    };
-    // HTTP POST http://localhost:8080/api/v1/users/
-    router.post("/", function (req, res) {
+    // HTTP POST http://localhost:8080/api/v1/users
+    router.post("/", validation_middleware_1.validateNewUser, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var newUser, result, userEmail, userData, user;
+            var newUser, userData, user;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         newUser = req.body;
-                        result = joi.validate(newUser, userDetailsSchema.newUser);
-                        if (!result.error) return [3 /*break*/, 1];
-                        res.status(400)
-                            .json({ message: "Invalid entry." })
-                            .send();
-                        return [3 /*break*/, 5];
+                        return [4 /*yield*/, userRepository.findOne({ email: newUser.email })];
                     case 1:
-                        userEmail = req.body.email;
-                        return [4 /*yield*/, userRepository.findOne({ email: userEmail })];
-                    case 2:
                         userData = _a.sent();
-                        if (!userData) return [3 /*break*/, 3];
-                        res.status(400)
-                            .json({ message: "Email " + userEmail + " already in use." })
-                            .send();
-                        return [3 /*break*/, 5];
-                    case 3: return [4 /*yield*/, userRepository.save(newUser)];
-                    case 4:
+                        if (!!userData) return [3 /*break*/, 3];
+                        return [4 /*yield*/, userRepository.save(newUser)];
+                    case 2:
                         user = _a.sent();
                         res.status(200)
-                            .json({ user: user })
+                            .json({ userData: user })
                             .send();
-                        _a.label = 5;
-                    case 5: return [2 /*return*/];
+                        return [3 /*break*/, 4];
+                    case 3:
+                        res.status(400)
+                            .json({ message: "Email " + newUser.email + " already in use." })
+                            .send();
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
                 }
             });
         }); })();
     });
     // HTTP GET http://localhost:8080/api/v1/users/:id
-    router.get("/:userId", function (req, res) {
+    router.get("/:id", validation_middleware_1.validateIds, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var userId, result, userData;
+            var userId, userData, links, comments;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        userId = req.params.userId;
-                        result = joi.validate(userId, userDetailsSchema.userId.id);
-                        if (!result.error) return [3 /*break*/, 1];
-                        res.status(400)
-                            .json({ message: "Invalid entry.", error: result.error })
-                            .send();
-                        return [3 /*break*/, 3];
-                    case 1: return [4 /*yield*/, userRepository.findOne(userId)];
-                    case 2:
+                        userId = req.params.validId;
+                        return [4 /*yield*/, userRepository.findOne(userId)];
+                    case 1:
                         userData = _a.sent();
-                        if (userData) {
-                            res.status(200)
-                                .json(userData);
-                        }
-                        else {
-                            res.status(404)
-                                .json({ message: "User id " + userId + " not found." })
-                                .send();
-                        }
-                        _a.label = 3;
-                    case 3: return [2 /*return*/];
+                        if (!userData) return [3 /*break*/, 4];
+                        return [4 /*yield*/, linkRepository.find({ user_id: userId })];
+                    case 2:
+                        links = _a.sent();
+                        return [4 /*yield*/, commentRepository.find({ user_id: userId })];
+                    case 3:
+                        comments = _a.sent();
+                        res.status(200)
+                            .json({
+                            userData: userData,
+                            links: links,
+                            comments: comments
+                        });
+                        return [3 /*break*/, 5];
+                    case 4:
+                        res.status(404)
+                            .json({ message: "User id " + userId + " not found." })
+                            .send();
+                        _a.label = 5;
+                    case 5: return [2 /*return*/];
                 }
             });
         }); })();
