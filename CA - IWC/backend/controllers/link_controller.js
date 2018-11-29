@@ -59,17 +59,36 @@ function getLinkController() {
     // HTTP GET http://localhost:8080/api/v1/links/
     router.get("/", function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var links;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var links, response, _a, _b, _i, i, linkData, votesData;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0: return [4 /*yield*/, linkRepository.find()];
                     case 1:
-                        links = _a.sent();
-                        /* TO DO
-                        Get all comments and votes */
+                        links = _c.sent();
+                        response = {};
+                        _a = [];
+                        for (_b in links)
+                            _a.push(_b);
+                        _i = 0;
+                        _c.label = 2;
+                    case 2:
+                        if (!(_i < _a.length)) return [3 /*break*/, 5];
+                        i = _a[_i];
+                        linkData = links[i];
+                        return [4 /*yield*/, voteRepository.find({ link_id: links[i].link_id })];
+                    case 3:
+                        votesData = _c.sent();
+                        //response[i] = { link: { linkData, comments: commentsData, votes: votesData }};
+                        response[i] = { link: { linkData: linkData, votes: votesData } };
+                        _c.label = 4;
+                    case 4:
+                        _i++;
+                        return [3 /*break*/, 2];
+                    case 5:
+                        // After everything is processed return to client.
                         if (links) {
                             res.status(200)
-                                .json(links);
+                                .json(response);
                         }
                         else {
                             res.status(404)
