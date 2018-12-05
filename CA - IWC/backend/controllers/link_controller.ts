@@ -39,8 +39,7 @@ export function getLinkController() {
             const linkId: number = req.params.validId;
             // Check if it is real and stores the link data
             const link = await linkChecker(linkId, res);
-console.log('linkId', linkId);
-console.log('link', link);
+
             // If link exists continue
             if (link) {
                 res.status(200)
@@ -161,7 +160,7 @@ async function linkChecker(linkId: number, res: any) {
     // Prepare link repository and fetch data
     const linkRepository = getLinkRepository();
     const linkExists = await linkRepository.findOne(linkId, { relations: ["user", "comments"] });
-console.log('linkExists', linkExists);
+
     // Check if link is real
     if (linkExists) {
         return linkExists;

@@ -90,8 +90,6 @@ function getLinkController() {
                         return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
                         link = _a.sent();
-                        console.log('linkId', linkId);
-                        console.log('link', link);
                         // If link exists continue
                         if (link) {
                             res.status(200)
@@ -241,7 +239,6 @@ function linkChecker(linkId, res) {
                     return [4 /*yield*/, linkRepository.findOne(linkId, { relations: ["user", "comments"] })];
                 case 1:
                     linkExists = _a.sent();
-                    console.log('linkExists', linkExists);
                     // Check if link is real
                     if (linkExists) {
                         return [2 /*return*/, linkExists];
