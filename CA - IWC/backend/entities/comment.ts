@@ -1,5 +1,6 @@
-import {Entity, Column, PrimaryGeneratedColumn, ManyToOne} from "typeorm";
-import {User} from "./user";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import { User } from "./user";
+import { Link } from "./link";
 
 @Entity()
 export class Comment {
@@ -10,8 +11,8 @@ export class Comment {
     @ManyToOne(type => User, user => user.comments)
     user!: User;
 
-    @Column()
-    public link_id!: number;
+    @ManyToOne(type => Link, link => link.comments)
+    link!: Link;
 
     @Column()
     public value!: string;

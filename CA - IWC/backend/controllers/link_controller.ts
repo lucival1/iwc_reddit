@@ -21,22 +21,10 @@ export function getLinkController() {
             // Get all the links available
             const links = await linkRepository.find();
 
-            // Response store all the links with their comments and votes
-            let response: any = {};
-
-            // Interate the Link results and looks for its comments and votes
-            for (let i in links) {
-                let linkData = links[i];
-                //let commentsData = await commentRepository.find({link_id: links[i].link_id });
-                let votesData = await voteRepository.find({ link_id: links[i].link_id });
-                //response[i] = { link: { linkData, comments: commentsData, votes: votesData }};
-                response[i] = { link: { linkData, votes: votesData }};
-            }
-
-            // After everything is processed return to client.
+            // If links exists return to client.
             if (links) {
                 res.status(200)
-                    .json(response);
+                    .json(links);
             } else {
                 res.status(404)
                     .json({ message: "No links found" });
@@ -49,19 +37,14 @@ export function getLinkController() {
     router.get("/:id", validateIds, (req, res) => {
         (async () => {
             const linkId: number = req.params.validId;
-            // Check if it is real and stores the link to data
+            // Check if it is real and stores the link data
             const link = await linkChecker(linkId, res);
-
+console.log('linkId', linkId);
+console.log('link', link);
             // If link exists continue
             if (link) {
-                // Get all the comments for the Link
-                const comments = await commentRepository.find({ link_id: linkId });
-                // Get all the votes for the Link
-                // const votes = await voteRepository.find({ link_id: linkId });
-                // Create obj with link, comments and votes
-                const response = { link, comments };
                 res.status(200)
-                    .json(response);
+                    .json(link);
             } else {
                 res.status(404)
                     .json({ message: `Link id ${ linkId } not found` });
@@ -97,19 +80,20 @@ export function getLinkController() {
     // HTTP DELETE http://localhost:8080/api/v1/links/:id
     router.delete("/:id", validateIds, authMiddleware, (req, res) => {
         (async () => {
-            const linkId: number = req.params.validId;
+            const linkId: number = parseInt(req.params.validId);
             const userId: number = req.body.user_id;
 
             // Check if it is real and stores the link to data
-            const linkData: any = await linkChecker(linkId, res);
+            const linkToRemove: any = await linkChecker(linkId, res);
 
             // If user from client matches with link owner continue otherwise respond accordingly
-            if (linkData.user_id === userId) {
-                await linkRepository.delete(linkId);
+            if (linkToRemove.user_id.user_id === userId) {
+                const deletedContent = await linkRepository.remove(linkToRemove);
+
                 res.status(200)
                     .json({
                         message: "Link deleted",
-                        data: linkData
+                        data: deletedContent
                     });
             } else {
                 res.status(401)
@@ -176,8 +160,8 @@ async function linkChecker(linkId: number, res: any) {
 
     // Prepare link repository and fetch data
     const linkRepository = getLinkRepository();
-    const linkExists = await linkRepository.findOne(linkId);
-
+    const linkExists = await linkRepository.findOne(linkId, { relations: ["user", "comments"] });
+console.log('linkExists', linkExists);
     // Check if link is real
     if (linkExists) {
         return linkExists;
@@ -191,7 +175,7 @@ async function linkChecker(linkId: number, res: any) {
 }
 
 
-async function voteChecker(linkId: number, userId: number, res: any) {
+async function voteChecker(linkId: any, userId: any, res: any) {
 
     // Prepare vote repository and fetch data
     const voteRepository = getVoteRepository();
