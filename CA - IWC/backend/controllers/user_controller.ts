@@ -45,21 +45,12 @@ export function getUserController() {
             // Get valid ID from validation service
             const userId: number = req.params.validId;
             // Fetch user data
-            const userData = await userRepository.findOne(userId);
+            const userData = await userRepository.findOne(userId, { relations: ["links", "comments"] });
 
             // If user is real, return all the related data
             if (userData) {
-                // Fetch user links
-                const links = await linkRepository.find({ user_id: userId });
-                // Fetch user comments
-                const comments = await commentRepository.find({ user_id: userId });
-
                 res.status(200)
-                    .json({
-                        userData,
-                        links,
-                        comments
-                    });
+                    .json(userData);
             } else {
                 res.status(404)
                     .json({ message: `User id ${ userId } not found.` })

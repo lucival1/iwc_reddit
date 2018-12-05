@@ -10,6 +10,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var typeorm_1 = require("typeorm");
+var user_1 = require("./user");
 var Link = /** @class */ (function () {
     function Link() {
     }
@@ -18,17 +19,17 @@ var Link = /** @class */ (function () {
         __metadata("design:type", Number)
     ], Link.prototype, "link_id", void 0);
     __decorate([
-        typeorm_1.Column(),
-        __metadata("design:type", Number)
-    ], Link.prototype, "user_id", void 0);
-    __decorate([
-        typeorm_1.Column(),
-        __metadata("design:type", String)
-    ], Link.prototype, "url", void 0);
+        typeorm_1.ManyToOne(function (type) { return user_1.User; }, function (user) { return user.links; }),
+        __metadata("design:type", user_1.User)
+    ], Link.prototype, "user", void 0);
     __decorate([
         typeorm_1.Column(),
         __metadata("design:type", String)
     ], Link.prototype, "title", void 0);
+    __decorate([
+        typeorm_1.Column(),
+        __metadata("design:type", String)
+    ], Link.prototype, "url", void 0);
     Link = __decorate([
         typeorm_1.Entity()
     ], Link);
