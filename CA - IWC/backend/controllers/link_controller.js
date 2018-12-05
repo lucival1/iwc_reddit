@@ -172,7 +172,7 @@ function getLinkController() {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
-                        userId = req.body.user_id;
+                        userId = req.body.user;
                         return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
                         linkData = _a.sent();
@@ -202,7 +202,7 @@ function getLinkController() {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
-                        userId = req.body.user_id;
+                        userId = req.body.user;
                         return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
                         linkData = _a.sent();
@@ -261,7 +261,7 @@ function voteChecker(linkId, userId, res) {
             switch (_a.label) {
                 case 0:
                     voteRepository = vote_repository_1.getVoteRepository();
-                    return [4 /*yield*/, voteRepository.findOne({ link_id: linkId, user_id: userId })];
+                    return [4 /*yield*/, voteRepository.findOne({ link_id: linkId, user: userId })];
                 case 1:
                     voteExists = _a.sent();
                     // Check if user has voted the link before
@@ -276,7 +276,7 @@ function voteChecker(linkId, userId, res) {
                     }
                     else {
                         newVote = {
-                            user_id: userId,
+                            user: userId,
                             link_id: linkId,
                             value: true
                         };

@@ -106,7 +106,7 @@ export function getLinkController() {
     router.post("/:id/upvote", validateIds, authMiddleware, (req, res) => {
         (async () => {
             const linkId: number = req.params.validId;
-            const userId: number = req.body.user_id;
+            const userId: number = req.body.user;
 
             // Check if it is real and stores the link to data
             const linkData: any = await linkChecker(linkId, res);
@@ -130,7 +130,7 @@ export function getLinkController() {
     router.post("/:id/downvote", validateIds, authMiddleware, (req, res) => {
         (async () => {
             const linkId: number = req.params.validId;
-            const userId: number = req.body.user_id;
+            const userId: number = req.body.user;
 
             // Check if it is real and stores the link to data
             const linkData: any = await linkChecker(linkId, res);
@@ -178,7 +178,7 @@ async function voteChecker(linkId: any, userId: any, res: any) {
 
     // Prepare vote repository and fetch data
     const voteRepository = getVoteRepository();
-    const voteExists = await voteRepository.findOne({ link_id: linkId, user_id: userId });
+    const voteExists = await voteRepository.findOne({ link_id: linkId, user: userId });
 
     // Check if user has voted the link before
     if (voteExists) {
@@ -193,11 +193,11 @@ async function voteChecker(linkId: any, userId: any, res: any) {
     } else {
         // Set new vote entity, default value is true, downvote route needs to be change to false
         const newVote: {
-            user_id: number,
+            user: number,
             link_id: number,
             value: boolean
         } = {
-            user_id: userId,
+            user: userId,
             link_id: linkId,
             value: true
         };
