@@ -32,7 +32,7 @@ var Link = /** @class */ (function () {
         __metadata("design:type", String)
     ], Link.prototype, "url", void 0);
     __decorate([
-        typeorm_1.OneToMany(function (type) { return comment_1.Comment; }, function (comment) { return comment.link; }),
+        typeorm_1.OneToMany(function (type) { return comment_1.Comment; }, function (comment) { return comment.link; }, { cascade: true }),
         __metadata("design:type", Array)
     ], Link.prototype, "comments", void 0);
     Link = __decorate([

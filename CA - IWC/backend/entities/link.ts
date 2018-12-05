@@ -17,6 +17,6 @@ export class Link {
     @Column()
     public url!: string;
 
-    @OneToMany(type => Comment, comment => comment.link)
+    @OneToMany(type => Comment, comment => comment.link, { cascade: true })
     comments!: Comment[];
 }

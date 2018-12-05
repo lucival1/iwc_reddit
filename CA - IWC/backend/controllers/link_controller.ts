@@ -80,13 +80,13 @@ export function getLinkController() {
     router.delete("/:id", validateIds, authMiddleware, (req, res) => {
         (async () => {
             const linkId: number = parseInt(req.params.validId);
-            const userId: number = req.body.user_id;
+            const userId: number = req.body.user;
 
             // Check if it is real and stores the link to data
             const linkToRemove: any = await linkChecker(linkId, res);
 
             // If user from client matches with link owner continue otherwise respond accordingly
-            if (linkToRemove.user_id.user_id === userId) {
+            if (linkToRemove.user.user_id === userId) {
                 const deletedContent = await linkRepository.remove(linkToRemove);
 
                 res.status(200)

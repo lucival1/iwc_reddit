@@ -141,11 +141,11 @@ function getLinkController() {
                 switch (_a.label) {
                     case 0:
                         linkId = parseInt(req.params.validId);
-                        userId = req.body.user_id;
+                        userId = req.body.user;
                         return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
                         linkToRemove = _a.sent();
-                        if (!(linkToRemove.user_id.user_id === userId)) return [3 /*break*/, 3];
+                        if (!(linkToRemove.user.user_id === userId)) return [3 /*break*/, 3];
                         return [4 /*yield*/, linkRepository.remove(linkToRemove)];
                     case 2:
                         deletedContent = _a.sent();

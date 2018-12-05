@@ -24,7 +24,7 @@ var Comment = /** @class */ (function () {
         __metadata("design:type", user_1.User)
     ], Comment.prototype, "user", void 0);
     __decorate([
-        typeorm_1.ManyToOne(function (type) { return link_1.Link; }, function (link) { return link.comments; }),
+        typeorm_1.ManyToOne(function (type) { return link_1.Link; }, function (link) { return link.comments; }, { onDelete: "CASCADE" }),
         __metadata("design:type", link_1.Link)
     ], Comment.prototype, "link", void 0);
     __decorate([
