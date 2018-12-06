@@ -30,7 +30,7 @@ import { getUserController } from "./backend/controllers/user_controller";
     const linksController = getLinkController();
     const usersController = getUserController();
     app.use("/api/v1/auth", authController);
-    app.use("/api/v1/movies", commentsController);
+    app.use("/api/v1/comments", commentsController);
     app.use("/api/v1/links", linksController);
     app.use("/api/v1/users", usersController);
 

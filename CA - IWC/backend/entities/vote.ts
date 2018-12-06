@@ -1,5 +1,5 @@
-import {Entity, Column, PrimaryGeneratedColumn, ManyToOne} from "typeorm";
-import {User} from "./user";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import { User } from "./user";
 
 @Entity()
 export class Vote {

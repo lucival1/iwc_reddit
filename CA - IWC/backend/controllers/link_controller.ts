@@ -56,7 +56,7 @@ export function getLinkController() {
     router.post("/", validateNewLink, authMiddleware, (req, res) => {
         (async () => {
             const newLink = req.body;
-            // Tell is the data sent is valid
+            // Tell if the data sent is valid
             const validLink = (req as any).validNewLink;
 
             // If data is valid save new Link
