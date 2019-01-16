@@ -84,6 +84,37 @@ function getCommentController() {
             });
         }); })();
     });
+    // HTTP DELETE http://localhost:8080/api/v1/comments/:id
+    router.delete("/:id", validation_middleware_1.validateIds, auth_middleware_1.authMiddleware, function (req, res) {
+        (function () { return __awaiter(_this, void 0, void 0, function () {
+            var commentId, userId, commentToRemove, deletedContent;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        commentId = req.params.validId;
+                        userId = req.body.user;
+                        return [4 /*yield*/, commentChecker(commentId, res)];
+                    case 1:
+                        commentToRemove = _a.sent();
+                        if (!(commentToRemove.user.user_id == userId)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, commentRepository.remove(commentToRemove)];
+                    case 2:
+                        deletedContent = _a.sent();
+                        res.status(200)
+                            .json({
+                            message: "Link deleted",
+                            data: commentToRemove
+                        });
+                        return [3 /*break*/, 4];
+                    case 3:
+                        res.status(401)
+                            .json({ message: "User id " + userId + " can't delete this link" });
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
+                }
+            });
+        }); })();
+    });
     return router;
 }
 exports.getCommentController = getCommentController;
@@ -105,6 +136,31 @@ function linkChecker(linkId, res) {
                         // When link not found
                         res.status(404)
                             .json({ message: "Link ID " + linkId + " not found." })
+                            .send();
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+function commentChecker(commentId, res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var commentRepository, commentExists;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    commentRepository = comment_repository_1.getCommentRepository();
+                    return [4 /*yield*/, commentRepository.findOne({ comment_id: commentId }, { relations: ["user"] })];
+                case 1:
+                    commentExists = _a.sent();
+                    // Check if link is real
+                    if (commentExists) {
+                        return [2 /*return*/, commentExists];
+                    }
+                    else {
+                        // When link not found
+                        res.status(404)
+                            .json({ message: "Comment ID " + commentId + " not found." })
                             .send();
                     }
                     return [2 /*return*/];
