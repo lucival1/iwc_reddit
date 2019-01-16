@@ -87,3 +87,34 @@ export function validateNewLink(
     }
 
 }
+export function validateNewComment(
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+) {
+    // defines newLink requirements
+    const newCommentSchema = {
+        value: joi.string(),
+        link: joi.number()
+    };
+    const newComment = req.body;
+
+    // check if title and url params are defined datatype
+    if (newComment.value != undefined && newComment.link != undefined) {
+        const result = joi.validate(newComment, newCommentSchema);
+
+        // If the Params are valid call next otherwise sends status 400
+        if (result.error) {
+            res.status(400)
+                .json({message: 'Invalid entries.'})
+                .send();
+        } else {
+            (req as any).validNewComment = true;
+            next();
+        }
+    } else {
+        res.status(400)
+            .json({message: "Invalid entries."});
+    }
+
+}
