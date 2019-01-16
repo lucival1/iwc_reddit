@@ -43,9 +43,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = __importStar(require("express"));
-var comment_repository_1 = require("../repositories/comment_repository");
 var validation_middleware_1 = require("../middleware/validation_middleware");
 var auth_middleware_1 = require("../middleware/auth_middleware");
+var comment_repository_1 = require("../repositories/comment_repository");
+var link_repository_1 = require("../repositories/link_repository");
 function getCommentController() {
     var _this = this;
     var commentRepository = comment_repository_1.getCommentRepository();
@@ -53,27 +54,32 @@ function getCommentController() {
     // HTTP POST http://localhost:8080//api/v1/comments
     router.post("/", validation_middleware_1.validateNewComment, auth_middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var newComment, validComment, commentData;
+            var newComment, validComment, linkData, commentData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         newComment = req.body;
                         validComment = req.validNewComment;
-                        if (!validComment) return [3 /*break*/, 2];
-                        return [4 /*yield*/, commentRepository.save(newComment)];
+                        if (!validComment) return [3 /*break*/, 4];
+                        return [4 /*yield*/, linkChecker(newComment.link, res)];
                     case 1:
+                        linkData = _a.sent();
+                        if (!linkData) return [3 /*break*/, 3];
+                        return [4 /*yield*/, commentRepository.save(newComment)];
+                    case 2:
                         commentData = _a.sent();
                         res.json({
                             message: "Comment created",
                             data: commentData
                         })
                             .send();
-                        return [3 /*break*/, 3];
-                    case 2:
+                        _a.label = 3;
+                    case 3: return [3 /*break*/, 5];
+                    case 4:
                         res.status(400)
                             .json({ message: "Invalid entries." });
-                        _a.label = 3;
-                    case 3: return [2 /*return*/];
+                        _a.label = 5;
+                    case 5: return [2 /*return*/];
                 }
             });
         }); })();
@@ -81,3 +87,28 @@ function getCommentController() {
     return router;
 }
 exports.getCommentController = getCommentController;
+function linkChecker(linkId, res) {
+    return __awaiter(this, void 0, void 0, function () {
+        var linkRepository, linkExists;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    linkRepository = link_repository_1.getLinkRepository();
+                    return [4 /*yield*/, linkRepository.findOne({ link_id: linkId })];
+                case 1:
+                    linkExists = _a.sent();
+                    // Check if link is real
+                    if (linkExists) {
+                        return [2 /*return*/, linkExists];
+                    }
+                    else {
+                        // When link not found
+                        res.status(404)
+                            .json({ message: "Link ID " + linkId + " not found." })
+                            .send();
+                    }
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
