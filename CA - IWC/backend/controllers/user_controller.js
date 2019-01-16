@@ -87,34 +87,25 @@ function getUserController() {
     // HTTP GET http://localhost:8080/api/v1/users/:id
     router.get("/:id", validation_middleware_1.validateIds, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var userId, userData, links, comments;
+            var userId, userData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         userId = req.params.validId;
-                        return [4 /*yield*/, userRepository.findOne(userId)];
+                        return [4 /*yield*/, userRepository.findOne(userId, { relations: ["links", "comments"] })];
                     case 1:
                         userData = _a.sent();
-                        if (!userData) return [3 /*break*/, 4];
-                        return [4 /*yield*/, linkRepository.find({ user_id: userId })];
-                    case 2:
-                        links = _a.sent();
-                        return [4 /*yield*/, commentRepository.find({ user_id: userId })];
-                    case 3:
-                        comments = _a.sent();
-                        res.status(200)
-                            .json({
-                            userData: userData,
-                            links: links,
-                            comments: comments
-                        });
-                        return [3 /*break*/, 5];
-                    case 4:
-                        res.status(404)
-                            .json({ message: "User id " + userId + " not found." })
-                            .send();
-                        _a.label = 5;
-                    case 5: return [2 /*return*/];
+                        // If user is real, return all the related data
+                        if (userData) {
+                            res.status(200)
+                                .json(userData);
+                        }
+                        else {
+                            res.status(404)
+                                .json({ message: "User id " + userId + " not found." })
+                                .send();
+                        }
+                        return [2 /*return*/];
                 }
             });
         }); })();

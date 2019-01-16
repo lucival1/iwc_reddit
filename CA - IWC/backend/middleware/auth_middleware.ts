@@ -34,7 +34,7 @@ export function authMiddleware(
                 const obj = jwt.verify(token, AUTH_SECRET) as any;
                 // Add the user ID to the HTTP request object so we can access it from the NEXT request handler
                 // console.log('obj', obj);
-                (req as any).body.user_id = obj.id;
+                (req as any).body.user = obj.id;
                 // Invoke NEXT request handler
                 next();
             } catch(err) {

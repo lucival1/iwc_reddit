@@ -59,36 +59,16 @@ function getLinkController() {
     // HTTP GET http://localhost:8080/api/v1/links
     router.get("/", function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var links, response, _a, _b, _i, i, linkData, votesData;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
+            var links;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0: return [4 /*yield*/, linkRepository.find()];
                     case 1:
-                        links = _c.sent();
-                        response = {};
-                        _a = [];
-                        for (_b in links)
-                            _a.push(_b);
-                        _i = 0;
-                        _c.label = 2;
-                    case 2:
-                        if (!(_i < _a.length)) return [3 /*break*/, 5];
-                        i = _a[_i];
-                        linkData = links[i];
-                        return [4 /*yield*/, voteRepository.find({ link_id: links[i].link_id })];
-                    case 3:
-                        votesData = _c.sent();
-                        //response[i] = { link: { linkData, comments: commentsData, votes: votesData }};
-                        response[i] = { link: { linkData: linkData, votes: votesData } };
-                        _c.label = 4;
-                    case 4:
-                        _i++;
-                        return [3 /*break*/, 2];
-                    case 5:
-                        // After everything is processed return to client.
+                        links = _a.sent();
+                        // If links exists return to client.
                         if (links) {
                             res.status(200)
-                                .json(response);
+                                .json(links);
                         }
                         else {
                             res.status(404)
@@ -102,7 +82,7 @@ function getLinkController() {
     // HTTP GET http://localhost:8080/api/v1/links/:id
     router.get("/:id", validation_middleware_1.validateIds, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var linkId, link, comments, response;
+            var linkId, link;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -110,19 +90,16 @@ function getLinkController() {
                         return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
                         link = _a.sent();
-                        if (!link) return [3 /*break*/, 3];
-                        return [4 /*yield*/, commentRepository.find({ link_id: linkId })];
-                    case 2:
-                        comments = _a.sent();
-                        response = { link: link, comments: comments };
-                        res.status(200)
-                            .json(response);
-                        return [3 /*break*/, 4];
-                    case 3:
-                        res.status(404)
-                            .json({ message: "Link id " + linkId + " not found" });
-                        _a.label = 4;
-                    case 4: return [2 /*return*/];
+                        // If link exists continue
+                        if (link) {
+                            res.status(200)
+                                .json(link);
+                        }
+                        else {
+                            res.status(404)
+                                .json({ message: "Link id " + linkId + " not found" });
+                        }
+                        return [2 /*return*/];
                 }
             });
         }); })();
@@ -159,23 +136,23 @@ function getLinkController() {
     // HTTP DELETE http://localhost:8080/api/v1/links/:id
     router.delete("/:id", validation_middleware_1.validateIds, auth_middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var linkId, userId, linkData;
+            var linkId, userId, linkToRemove, deletedContent;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        linkId = req.params.validId;
-                        userId = req.body.user_id;
+                        linkId = parseInt(req.params.validId);
+                        userId = req.body.user;
                         return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
-                        linkData = _a.sent();
-                        if (!(linkData.user_id === userId)) return [3 /*break*/, 3];
-                        return [4 /*yield*/, linkRepository.delete(linkId)];
+                        linkToRemove = _a.sent();
+                        if (!(linkToRemove.user.user_id === userId)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, linkRepository.remove(linkToRemove)];
                     case 2:
-                        _a.sent();
+                        deletedContent = _a.sent();
                         res.status(200)
                             .json({
                             message: "Link deleted",
-                            data: linkData
+                            data: deletedContent
                         });
                         return [3 /*break*/, 4];
                     case 3:
@@ -195,7 +172,7 @@ function getLinkController() {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
-                        userId = req.body.user_id;
+                        userId = req.body.user;
                         return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
                         linkData = _a.sent();
@@ -225,7 +202,7 @@ function getLinkController() {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
-                        userId = req.body.user_id;
+                        userId = req.body.user;
                         return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
                         linkData = _a.sent();
@@ -259,7 +236,7 @@ function linkChecker(linkId, res) {
             switch (_a.label) {
                 case 0:
                     linkRepository = link_repository_1.getLinkRepository();
-                    return [4 /*yield*/, linkRepository.findOne(linkId)];
+                    return [4 /*yield*/, linkRepository.findOne(linkId, { relations: ["user", "comments"] })];
                 case 1:
                     linkExists = _a.sent();
                     // Check if link is real
@@ -284,7 +261,7 @@ function voteChecker(linkId, userId, res) {
             switch (_a.label) {
                 case 0:
                     voteRepository = vote_repository_1.getVoteRepository();
-                    return [4 /*yield*/, voteRepository.findOne({ link_id: linkId, user_id: userId })];
+                    return [4 /*yield*/, voteRepository.findOne({ link_id: linkId, user: userId })];
                 case 1:
                     voteExists = _a.sent();
                     // Check if user has voted the link before
@@ -299,7 +276,7 @@ function voteChecker(linkId, userId, res) {
                     }
                     else {
                         newVote = {
-                            user_id: userId,
+                            user: userId,
                             link_id: linkId,
                             value: true
                         };

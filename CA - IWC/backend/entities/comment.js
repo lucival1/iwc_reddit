@@ -10,6 +10,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var typeorm_1 = require("typeorm");
+var user_1 = require("./user");
+var link_1 = require("./link");
 var Comment = /** @class */ (function () {
     function Comment() {
     }
@@ -18,13 +20,13 @@ var Comment = /** @class */ (function () {
         __metadata("design:type", Number)
     ], Comment.prototype, "comment_id", void 0);
     __decorate([
-        typeorm_1.Column(),
-        __metadata("design:type", Number)
-    ], Comment.prototype, "user_id", void 0);
+        typeorm_1.ManyToOne(function (type) { return user_1.User; }, function (user) { return user.comments; }),
+        __metadata("design:type", user_1.User)
+    ], Comment.prototype, "user", void 0);
     __decorate([
-        typeorm_1.Column(),
-        __metadata("design:type", Number)
-    ], Comment.prototype, "link_id", void 0);
+        typeorm_1.ManyToOne(function (type) { return link_1.Link; }, function (link) { return link.comments; }, { onDelete: "CASCADE" }),
+        __metadata("design:type", link_1.Link)
+    ], Comment.prototype, "link", void 0);
     __decorate([
         typeorm_1.Column(),
         __metadata("design:type", String)
