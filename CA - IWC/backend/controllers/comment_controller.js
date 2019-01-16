@@ -102,8 +102,8 @@ function getCommentController() {
                         deletedContent = _a.sent();
                         res.status(200)
                             .json({
-                            message: "Link deleted",
-                            data: commentToRemove
+                            message: "Comment deleted",
+                            data: deletedContent
                         });
                         return [3 /*break*/, 4];
                     case 3:

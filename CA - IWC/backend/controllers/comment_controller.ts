@@ -51,8 +51,8 @@ export function getCommentController() {
 
                 res.status(200)
                     .json({
-                        message: "Link deleted",
-                        data: commentToRemove
+                        message: "Comment deleted",
+                        data: deletedContent
                     });
             } else {
                 res.status(401)
