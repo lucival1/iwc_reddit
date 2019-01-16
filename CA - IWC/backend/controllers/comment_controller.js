@@ -51,7 +51,7 @@ function getCommentController() {
     var _this = this;
     var commentRepository = comment_repository_1.getCommentRepository();
     var router = express.Router();
-    // HTTP POST http://localhost:8080//api/v1/comments
+    // HTTP POST http://localhost:8080/api/v1/comments
     router.post("/", validation_middleware_1.validateNewComment, auth_middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
             var newComment, validComment, linkData, commentData;
@@ -84,6 +84,40 @@ function getCommentController() {
             });
         }); })();
     });
+    // HTTP PATCH http://localhost:8080/api/v1/comments/:id
+    router.patch("/:id", validation_middleware_1.validateIds, auth_middleware_1.authMiddleware, function (req, res) {
+        (function () { return __awaiter(_this, void 0, void 0, function () {
+            var commentId, userId, newComment, commentToUpdate, commentData;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        commentId = req.params.validId;
+                        userId = req.body.user;
+                        newComment = req.body.value;
+                        return [4 /*yield*/, commentChecker(commentId, res)];
+                    case 1:
+                        commentToUpdate = _a.sent();
+                        if (!(commentToUpdate.user.user_id == userId)) return [3 /*break*/, 3];
+                        // set new comment value
+                        commentToUpdate.value = newComment;
+                        return [4 /*yield*/, commentRepository.save(commentToUpdate)];
+                    case 2:
+                        commentData = _a.sent();
+                        res.json({
+                            message: "Comment updated",
+                            data: commentData
+                        })
+                            .send();
+                        return [3 /*break*/, 4];
+                    case 3:
+                        res.status(400)
+                            .json({ message: "User id " + userId + " can't update this comment" });
+                        _a.label = 4;
+                    case 4: return [2 /*return*/];
+                }
+            });
+        }); })();
+    });
     // HTTP DELETE http://localhost:8080/api/v1/comments/:id
     router.delete("/:id", validation_middleware_1.validateIds, auth_middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
@@ -107,8 +141,8 @@ function getCommentController() {
                         });
                         return [3 /*break*/, 4];
                     case 3:
-                        res.status(401)
-                            .json({ message: "User id " + userId + " can't delete this link" });
+                        res.status(400)
+                            .json({ message: "User id " + userId + " can't delete this comment" });
                         _a.label = 4;
                     case 4: return [2 /*return*/];
                 }
