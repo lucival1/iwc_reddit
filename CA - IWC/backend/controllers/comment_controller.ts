@@ -1,27 +1,33 @@
 import * as express from "express";
 import { getCommentRepository } from "../repositories/comment_repository";
-import * as joi from "joi";
+import { validateIds, validateNewComment } from "../middleware/validation_middleware";
+import { authMiddleware } from "../middleware/auth_middleware";
 
 export function getCommentController() {
 
     const commentRepository = getCommentRepository();
     const router = express.Router();
 
-    const userDetailsSchema = {
-        email: joi.string().email(),
-        password: joi.string()
-    };
-
-    // HTTP POST http://localhost:8080//api/v1/auth/login/
-    router.post("/login", (req, res) => {
+    // HTTP POST http://localhost:8080//api/v1/comments
+    router.post("/", validateNewComment, authMiddleware, (req, res) => {
         (async () => {
-            const userDetails = req.body;
-            const result = joi.validate(userDetails, userDetailsSchema);
-            if (result.error) {
-                res.status(400).send();
+            const newComment = req.body;
+            // Tell if the data sent is valid
+            const validComment = (req as any).validNewComment;
+
+            /* TODO check link id before create comment */
+
+            // If data is valid save new Comment
+            if(validComment) {
+                const commentData = await commentRepository.save(newComment);
+                res.json({
+                        message: "Comment created",
+                        data: commentData
+                    })
+                    .send();
             } else {
-                const match = await commentRepository.findOne(userDetails);
-                res.json({ ok: "ok" }).send();
+                res.status(400)
+                    .json({ message: "Invalid entries." });
             }
         })();
     });

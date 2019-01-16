@@ -44,31 +44,34 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var express = __importStar(require("express"));
 var comment_repository_1 = require("../repositories/comment_repository");
-var joi = __importStar(require("joi"));
+var validation_middleware_1 = require("../middleware/validation_middleware");
+var auth_middleware_1 = require("../middleware/auth_middleware");
 function getCommentController() {
     var _this = this;
     var commentRepository = comment_repository_1.getCommentRepository();
     var router = express.Router();
-    var userDetailsSchema = {
-        email: joi.string().email(),
-        password: joi.string()
-    };
-    // HTTP POST http://localhost:8080//api/v1/auth/login/
-    router.post("/login", function (req, res) {
+    // HTTP POST http://localhost:8080//api/v1/comments
+    router.post("/", validation_middleware_1.validateNewComment, auth_middleware_1.authMiddleware, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var userDetails, result, match;
+            var newComment, validComment, commentData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        userDetails = req.body;
-                        result = joi.validate(userDetails, userDetailsSchema);
-                        if (!result.error) return [3 /*break*/, 1];
-                        res.status(400).send();
+                        newComment = req.body;
+                        validComment = req.validNewComment;
+                        if (!validComment) return [3 /*break*/, 2];
+                        return [4 /*yield*/, commentRepository.save(newComment)];
+                    case 1:
+                        commentData = _a.sent();
+                        res.json({
+                            message: "Comment created",
+                            data: commentData
+                        })
+                            .send();
                         return [3 /*break*/, 3];
-                    case 1: return [4 /*yield*/, commentRepository.findOne(userDetails)];
                     case 2:
-                        match = _a.sent();
-                        res.json({ ok: "ok" }).send();
+                        res.status(400)
+                            .json({ message: "Invalid entries." });
                         _a.label = 3;
                     case 3: return [2 /*return*/];
                 }
