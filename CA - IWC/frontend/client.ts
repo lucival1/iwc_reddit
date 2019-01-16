@@ -149,3 +149,65 @@ let downvoteLink = (async (linkId: number) => {
     const json = await response.json();
     console.log(json);
 });
+
+
+// post a new comment
+let postComment = (async (value_: string, link_: number) => {
+    const commentData = {
+        value: value_,
+        link: link_
+    };
+
+    const response = await fetch(
+        "http://localhost:8080/api/v1/comments",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNTQ0MDA2NDc1fQ.VeTElpEPlPzefezB4PXtZGSPzutEGLfefaEAwJjIob4"
+            },
+            body: JSON.stringify(commentData)
+        }
+    );
+    const json = await response.json();
+    console.log(json);
+});
+
+
+// patch a new comment
+let patchComment = (async (value_: string, link_: number, commentId: number) => {
+    const commentData = {
+        value: value_,
+        link: link_
+    };
+
+    const response = await fetch(
+        "http://localhost:8080/api/v1/comments/" + commentId,
+        {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "x-auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNTQ0MDA2NDc1fQ.VeTElpEPlPzefezB4PXtZGSPzutEGLfefaEAwJjIob4"
+            },
+            body: JSON.stringify(commentData)
+        }
+    );
+    const json = await response.json();
+    console.log(json);
+});
+
+
+// delete a new comment
+let deleteComment = (async (commentId: number) => {
+    const response = await fetch(
+        "http://localhost:8080/api/v1/comments/" + commentId,
+        {
+            method: "DELETE",
+            headers: {
+                "x-auth-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNTQ0MDA2NDc1fQ.VeTElpEPlPzefezB4PXtZGSPzutEGLfefaEAwJjIob4"
+            }
+        }
+    );
+    const json = await response.json();
+    console.log(json);
+});
