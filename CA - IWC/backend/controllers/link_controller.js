@@ -82,18 +82,20 @@ function getLinkController() {
     // HTTP GET http://localhost:8080/api/v1/links/:id
     router.get("/:id", validation_middleware_1.validateIds, function (req, res) {
         (function () { return __awaiter(_this, void 0, void 0, function () {
-            var linkId, link;
+            var linkId, linkData;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         linkId = req.params.validId;
                         return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
-                        link = _a.sent();
+                        linkData = _a.sent();
                         // If link exists continue
-                        if (link) {
+                        if (linkData) {
+                            // delete user data from object
+                            delete linkData.user;
                             res.status(200)
-                                .json(link);
+                                .json(linkData);
                         }
                         else {
                             res.status(404)
@@ -140,12 +142,14 @@ function getLinkController() {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        linkId = parseInt(req.params.validId);
+                        linkId = req.params.validId;
                         userId = req.body.user;
                         return [4 /*yield*/, linkChecker(linkId, res)];
                     case 1:
                         linkToRemove = _a.sent();
                         if (!(linkToRemove.user.user_id === userId)) return [3 /*break*/, 3];
+                        // delete user data from object
+                        delete linkToRemove.user;
                         return [4 /*yield*/, linkRepository.remove(linkToRemove)];
                     case 2:
                         deletedContent = _a.sent();

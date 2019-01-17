@@ -38,12 +38,14 @@ export function getLinkController() {
         (async () => {
             const linkId: number = req.params.validId;
             // Check if it is real and stores the link data
-            const link = await linkChecker(linkId, res);
+            const linkData = await linkChecker(linkId, res);
 
             // If link exists continue
-            if (link) {
+            if (linkData) {
+                // delete user data from object
+                delete linkData.user;
                 res.status(200)
-                    .json(link);
+                    .json(linkData);
             } else {
                 res.status(404)
                     .json({ message: `Link id ${ linkId } not found` });
@@ -79,7 +81,7 @@ export function getLinkController() {
     // HTTP DELETE http://localhost:8080/api/v1/links/:id
     router.delete("/:id", validateIds, authMiddleware, (req, res) => {
         (async () => {
-            const linkId: number = parseInt(req.params.validId);
+            const linkId: number = req.params.validId;
             const userId: number = req.body.user;
 
             // Check if it is real and stores the link to data
@@ -87,8 +89,9 @@ export function getLinkController() {
 
             // If user from client matches with link owner continue otherwise respond accordingly
             if (linkToRemove.user.user_id === userId) {
+                // delete user data from object
+                delete linkToRemove.user;
                 const deletedContent = await linkRepository.remove(linkToRemove);
-
                 res.status(200)
                     .json({
                         message: "Link deleted",
