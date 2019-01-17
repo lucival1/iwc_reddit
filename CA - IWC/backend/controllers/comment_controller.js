@@ -98,6 +98,8 @@ function getCommentController() {
                     case 1:
                         commentToUpdate = _a.sent();
                         if (!(commentToUpdate.user.user_id == userId)) return [3 /*break*/, 3];
+                        // delete user data from object
+                        delete commentToUpdate.user;
                         // set new comment value
                         commentToUpdate.value = newComment;
                         return [4 /*yield*/, commentRepository.save(commentToUpdate)];
@@ -131,6 +133,8 @@ function getCommentController() {
                     case 1:
                         commentToRemove = _a.sent();
                         if (!(commentToRemove.user.user_id == userId)) return [3 /*break*/, 3];
+                        // delete user data from object
+                        delete commentToRemove.user;
                         return [4 /*yield*/, commentRepository.remove(commentToRemove)];
                     case 2:
                         deletedContent = _a.sent();

@@ -48,10 +48,11 @@ export function getCommentController() {
 
             // If user that posted the comment is the same who is trying to update, proceed
             if(commentToUpdate.user.user_id == userId) {
+                // delete user data from object
+                delete commentToUpdate.user;
                 // set new comment value
                 commentToUpdate.value = newComment;
                 const commentData = await commentRepository.save(commentToUpdate);
-
                 res.json({
                     message: "Comment updated",
                     data: commentData
@@ -75,8 +76,9 @@ export function getCommentController() {
 
             // If user that posted the comment is the same who is trying to delete, proceed
             if (commentToRemove.user.user_id == userId) {
+                // delete user data from object
+                delete commentToRemove.user;
                 const deletedContent = await commentRepository.remove(commentToRemove);
-
                 res.status(200)
                     .json({
                         message: "Comment deleted",
