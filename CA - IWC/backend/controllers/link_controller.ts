@@ -4,6 +4,8 @@ import { validateIds, validateNewLink } from "../middleware/validation_middlewar
 import { getLinkRepository } from "../repositories/link_repository";
 import { getCommentRepository } from "../repositories/comment_repository";
 import { getVoteRepository } from "../repositories/vote_repository";
+import { Repository } from "typeorm";
+import { Link } from "../entities/link";
 
 export function getLinkController() {
 
@@ -208,4 +210,19 @@ async function voteChecker(linkId: any, userId: any, res: any) {
         return newVote;
     }
 
+}
+
+export function getHandlers(linkRepository: Repository<Link>) {
+
+    const httpPostLinkHandler = (
+        req: express.Request,
+        res: express.Response
+    ) => {
+        (async () => {
+            const link = await linkRepository.save(req);
+            res.json(link);
+        })();
+    };
+
+    return { httpPostLinkHandler };
 }
