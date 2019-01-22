@@ -1,8 +1,8 @@
 import { createConnection } from "typeorm";
-import { Comment } from "./backend/entities/comment";
-import { Link } from "./backend/entities/link";
-import { User } from "./backend/entities/user";
-import { Vote } from "./backend/entities/vote";
+import { Comment } from "../entities/comment";
+import { Link } from "../entities/link";
+import { User } from "../entities/user";
+import { Vote } from "../entities/vote";
 
 export async function createDbConnection() {
 

@@ -1,13 +1,13 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { createDbConnection } from "./db";
-import { getAuthController } from "./backend/controllers/auth_controller";
-import { getCommentController } from "./backend/controllers/comment_controller";
-import { getLinkController } from "./backend/controllers/link_controller";
-import { getUserController } from "./backend/controllers/user_controller";
+import { getAuthController } from "../controllers/auth_controller";
+import { getCommentController } from "../controllers/comment_controller";
+import { getLinkController } from "../controllers/link_controller";
+import { getUserController } from "../controllers/user_controller";
 
 
-(async () => {
+export async function getApp(useFakeDabe = false) {
 
     // Create db connection
     await createDbConnection();
@@ -34,11 +34,6 @@ import { getUserController } from "./backend/controllers/user_controller";
     app.use("/api/v1/links", linksController);
     app.use("/api/v1/users", usersController);
 
-    // Start the server
-    app.listen(8080, () => {
-        console.log(
-            "The server is running in port 8080!"
-        );
-    });
+    return app;
 
-})();
+};
