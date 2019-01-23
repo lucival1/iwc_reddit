@@ -291,3 +291,22 @@ function voteChecker(linkId, userId, res) {
         });
     });
 }
+function getHandlers(linkRepository) {
+    var _this = this;
+    var httpPostLinkHandler = function (req, res) {
+        (function () { return __awaiter(_this, void 0, void 0, function () {
+            var link;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, linkRepository.save(req)];
+                    case 1:
+                        link = _a.sent();
+                        res.json(link);
+                        return [2 /*return*/];
+                }
+            });
+        }); })();
+    };
+    return { httpPostLinkHandler: httpPostLinkHandler };
+}
+exports.getHandlers = getHandlers;

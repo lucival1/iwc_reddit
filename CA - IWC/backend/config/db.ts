@@ -1,12 +1,12 @@
 import { createConnection } from "typeorm";
-import { Comment } from "./backend/entities/comment";
-import { Link } from "./backend/entities/link";
-import { User } from "./backend/entities/user";
-import { Vote } from "./backend/entities/vote";
+import { Comment } from "../entities/comment";
+import { Link } from "../entities/link";
+import { User } from "../entities/user";
+import { Vote } from "../entities/vote";
 
 export async function createDbConnection() {
 
-    // Read the database settings from the environment vairables
+    // Read the database settings from the environment variables
     const DATABASE_HOST = process.env.DATABASE_HOST;
     const DATABASE_PASSWORD = process.env.DATABASE_PASSWORD;
     const DATABASE_USER = process.env.DATABASE_USER;
