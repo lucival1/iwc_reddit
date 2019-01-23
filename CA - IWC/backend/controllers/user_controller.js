@@ -45,14 +45,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var express = __importStar(require("express"));
 var user_repository_1 = require("../repositories/user_repository");
 var validation_middleware_1 = require("../middleware/validation_middleware");
-var link_repository_1 = require("../repositories/link_repository");
-var comment_repository_1 = require("../repositories/comment_repository");
 function getUserController() {
     var _this = this;
     // Prepare repositories
     var userRepository = user_repository_1.getUserRepository();
-    var linkRepository = link_repository_1.getLinkRepository();
-    var commentRepository = comment_repository_1.getCommentRepository();
     // Create router instance so we can declare endpoints
     var router = express.Router();
     // HTTP POST http://localhost:8080/api/v1/users
@@ -70,14 +66,12 @@ function getUserController() {
                         return [4 /*yield*/, userRepository.save(newUser)];
                     case 2:
                         user = _a.sent();
-                        res.status(200)
-                            .json({ userData: user })
-                            .send();
+                        res.status(201)
+                            .json({ userData: user });
                         return [3 /*break*/, 4];
                     case 3:
                         res.status(400)
-                            .json({ message: "Email " + newUser.email + " already in use." })
-                            .send();
+                            .send({ message: "Email " + newUser.email + " already in use." });
                         _a.label = 4;
                     case 4: return [2 /*return*/];
                 }
@@ -102,8 +96,7 @@ function getUserController() {
                         }
                         else {
                             res.status(404)
-                                .json({ message: "User id " + userId + " not found." })
-                                .send();
+                                .send({ message: "User id " + userId + " not found." });
                         }
                         return [2 /*return*/];
                 }

@@ -46,13 +46,11 @@ var express = __importStar(require("express"));
 var auth_middleware_1 = require("../middleware/auth_middleware");
 var validation_middleware_1 = require("../middleware/validation_middleware");
 var link_repository_1 = require("../repositories/link_repository");
-var comment_repository_1 = require("../repositories/comment_repository");
 var vote_repository_1 = require("../repositories/vote_repository");
 function getLinkController() {
     var _this = this;
     // Prepare repositories
     var linkRepository = link_repository_1.getLinkRepository();
-    var commentRepository = comment_repository_1.getCommentRepository();
     var voteRepository = vote_repository_1.getVoteRepository();
     // Create router instance so we can declare endpoints
     var router = express.Router();
@@ -72,7 +70,7 @@ function getLinkController() {
                         }
                         else {
                             res.status(404)
-                                .json({ message: "No links found" });
+                                .send({ message: "No links found" });
                         }
                         return [2 /*return*/];
                 }
@@ -99,7 +97,7 @@ function getLinkController() {
                         }
                         else {
                             res.status(404)
-                                .json({ message: "Link id " + linkId + " not found" });
+                                .send({ message: "Link id " + linkId + " not found" });
                         }
                         return [2 /*return*/];
                 }
@@ -119,16 +117,15 @@ function getLinkController() {
                         return [4 /*yield*/, linkRepository.save(newLink)];
                     case 1:
                         linkData = _a.sent();
-                        res.status(200)
+                        res.status(201)
                             .json({
                             message: "Link posted",
                             data: linkData
-                        })
-                            .send();
+                        });
                         return [3 /*break*/, 3];
                     case 2:
                         res.status(400)
-                            .json({ message: "Invalid entries." });
+                            .send({ message: "Invalid entries." });
                         _a.label = 3;
                     case 3: return [2 /*return*/];
                 }
@@ -153,15 +150,15 @@ function getLinkController() {
                         return [4 /*yield*/, linkRepository.remove(linkToRemove)];
                     case 2:
                         deletedContent = _a.sent();
-                        res.status(200)
+                        res.status(201)
                             .json({
                             message: "Link deleted",
                             data: deletedContent
                         });
                         return [3 /*break*/, 4];
                     case 3:
-                        res.status(401)
-                            .json({ message: "User id " + userId + " can't delete this link" });
+                        res.status(403)
+                            .send({ message: "User id " + userId + " can't delete this link" });
                         _a.label = 4;
                     case 4: return [2 /*return*/];
                 }
@@ -187,7 +184,7 @@ function getLinkController() {
                         return [4 /*yield*/, voteRepository.save(voteToCast)];
                     case 3:
                         voteData = _a.sent();
-                        res.status(200)
+                        res.status(201)
                             .json({
                             message: "Vote casted",
                             data: voteData
@@ -219,7 +216,7 @@ function getLinkController() {
                         return [4 /*yield*/, voteRepository.save(voteToCast)];
                     case 3:
                         voteData = _a.sent();
-                        res.status(200)
+                        res.status(201)
                             .json({
                             message: "Vote casted",
                             data: voteData
@@ -250,8 +247,7 @@ function linkChecker(linkId, res) {
                     else {
                         // When link not found
                         res.status(404)
-                            .json({ message: "Link ID " + linkId + " not found." })
-                            .send();
+                            .send({ message: "Link ID " + linkId + " not found." });
                     }
                     return [2 /*return*/];
             }
@@ -275,8 +271,7 @@ function voteChecker(linkId, userId, res) {
                             .json({
                             message: "User already has casted a vote.",
                             data: voteExists
-                        })
-                            .send();
+                        });
                     }
                     else {
                         newVote = {

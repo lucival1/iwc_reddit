@@ -44,14 +44,13 @@ export function validateNewUser(
         // If the Params are valid call next otherwise sends status 400
         if (result.error) {
             res.status(400)
-                .json({message: 'Invalid entries.'})
-                .send();
+                .send({ message: 'Invalid entries.' });
         } else {
             next();
         }
     } else {
         res.status(400)
-            .json({message: "Invalid entries."});
+            .send({ message: "Invalid entries." });
     }
 
 }
@@ -75,15 +74,14 @@ export function validateNewLink(
         // If the Params are valid call next otherwise sends status 400
         if (result.error) {
             res.status(400)
-                .json({message: 'Invalid entries.'})
-                .send();
+                .send({ message: 'Invalid entries.' });
         } else {
             (req as any).validNewLink = true;
             next();
         }
     } else {
         res.status(400)
-            .json({message: "Invalid entries."});
+            .send({ message: "Invalid entries." });
     }
 
 }
@@ -106,15 +104,14 @@ export function validateNewComment(
         // If the Params are valid call next otherwise sends status 400
         if (result.error) {
             res.status(400)
-                .json({message: 'Invalid entries.'})
-                .send();
+                .send({ message: 'Invalid entries.' });
         } else {
             (req as any).validNewComment = true;
             next();
         }
     } else {
         res.status(400)
-            .json({message: "Invalid entries."});
+            .send({ message: "Invalid entries." });
     }
 
 }

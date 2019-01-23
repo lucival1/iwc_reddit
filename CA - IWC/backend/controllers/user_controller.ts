@@ -1,15 +1,11 @@
 import * as express from "express";
 import { getUserRepository } from "../repositories/user_repository";
 import { validateIds, validateNewUser } from "../middleware/validation_middleware";
-import { getLinkRepository } from "../repositories/link_repository";
-import { getCommentRepository } from "../repositories/comment_repository";
 
 export function getUserController() {
 
     // Prepare repositories
     const userRepository = getUserRepository();
-    const linkRepository = getLinkRepository();
-    const commentRepository = getCommentRepository();
 
     // Create router instance so we can declare endpoints
     const router = express.Router();
@@ -27,13 +23,11 @@ export function getUserController() {
                 // Create new user
                 const user = await userRepository.save(newUser);
 
-                res.status(200)
-                    .json({ userData: user })
-                    .send();
+                res.status(201)
+                    .json({ userData: user });
             } else {
                 res.status(400)
-                    .json({ message: `Email ${ newUser.email } already in use.` })
-                    .send();
+                    .send({ message: `Email ${ newUser.email } already in use.` });
             }
         })();
     });
@@ -53,8 +47,7 @@ export function getUserController() {
                     .json(userData);
             } else {
                 res.status(404)
-                    .json({ message: `User id ${ userId } not found.` })
-                    .send();
+                    .send({ message: `User id ${ userId } not found.` });
             }
         })();
     });

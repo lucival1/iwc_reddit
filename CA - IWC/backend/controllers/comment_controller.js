@@ -49,7 +49,9 @@ var comment_repository_1 = require("../repositories/comment_repository");
 var link_repository_1 = require("../repositories/link_repository");
 function getCommentController() {
     var _this = this;
+    // Prepare repositories
     var commentRepository = comment_repository_1.getCommentRepository();
+    // Create router instance so we can declare endpoints
     var router = express.Router();
     // HTTP POST http://localhost:8080/api/v1/comments
     router.post("/", validation_middleware_1.validateNewComment, auth_middleware_1.authMiddleware, function (req, res) {
@@ -68,16 +70,16 @@ function getCommentController() {
                         return [4 /*yield*/, commentRepository.save(newComment)];
                     case 2:
                         commentData = _a.sent();
-                        res.json({
+                        res.status(201)
+                            .json({
                             message: "Comment created",
                             data: commentData
-                        })
-                            .send();
+                        });
                         _a.label = 3;
                     case 3: return [3 /*break*/, 5];
                     case 4:
                         res.status(400)
-                            .json({ message: "Invalid entries." });
+                            .send({ message: "Invalid entries." });
                         _a.label = 5;
                     case 5: return [2 /*return*/];
                 }
@@ -105,15 +107,15 @@ function getCommentController() {
                         return [4 /*yield*/, commentRepository.save(commentToUpdate)];
                     case 2:
                         commentData = _a.sent();
-                        res.json({
+                        res.status(200)
+                            .json({
                             message: "Comment updated",
                             data: commentData
-                        })
-                            .send();
+                        });
                         return [3 /*break*/, 4];
                     case 3:
-                        res.status(400)
-                            .json({ message: "User id " + userId + " can't update this comment" });
+                        res.status(403)
+                            .send({ message: "User id " + userId + " can't update this comment" });
                         _a.label = 4;
                     case 4: return [2 /*return*/];
                 }
@@ -145,8 +147,8 @@ function getCommentController() {
                         });
                         return [3 /*break*/, 4];
                     case 3:
-                        res.status(400)
-                            .json({ message: "User id " + userId + " can't delete this comment" });
+                        res.status(403)
+                            .send({ message: "User id " + userId + " can't delete this comment" });
                         _a.label = 4;
                     case 4: return [2 /*return*/];
                 }
@@ -173,8 +175,7 @@ function linkChecker(linkId, res) {
                     else {
                         // When link not found
                         res.status(404)
-                            .json({ message: "Link ID " + linkId + " not found." })
-                            .send();
+                            .send({ message: "Link ID " + linkId + " not found." });
                     }
                     return [2 /*return*/];
             }
@@ -198,8 +199,7 @@ function commentChecker(commentId, res) {
                     else {
                         // When link not found
                         res.status(404)
-                            .json({ message: "Comment ID " + commentId + " not found." })
-                            .send();
+                            .send({ message: "Comment ID " + commentId + " not found." });
                     }
                     return [2 /*return*/];
             }

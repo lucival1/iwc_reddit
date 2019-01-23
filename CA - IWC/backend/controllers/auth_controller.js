@@ -51,8 +51,11 @@ var joi = __importStar(require("joi"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 function getAuthController() {
     var _this = this;
+    // AUTH_SECRET must come from the environment variables
     var AUTH_SECRET = "123"; //process.env.AUTH_SECRET;
+    // Prepare repositories
     var userRepository = user_repository_1.getUserRepository();
+    // Create router instance so we can declare endpoints
     var router = express.Router();
     var userDetailsSchema = {
         email: joi.string().email(),
@@ -69,23 +72,21 @@ function getAuthController() {
                         userDetails = req.body;
                         result = joi.validate(userDetails, userDetailsSchema);
                         if (!result.error) return [3 /*break*/, 1];
-                        console.log('auth', 400);
-                        res.status(400).send();
+                        res.status(400).send({ message: 'Invalid user details' });
                         return [3 /*break*/, 3];
                     case 1: return [4 /*yield*/, userRepository.findOne(userDetails)];
                     case 2:
                         match = _a.sent();
                         if (match === undefined) {
-                            console.log('auth', 401);
-                            res.status(401).send();
+                            res.status(401).send({ message: 'Unauthorized Access' });
                         }
                         else {
                             if (AUTH_SECRET === undefined) {
-                                res.status(500).send();
+                                res.status(500).send({ message: 'Internal Server error' });
                             }
                             else {
                                 token = jsonwebtoken_1.default.sign({ id: match.user_id }, AUTH_SECRET);
-                                res.json({ token: token }).send();
+                                res.json({ token: token });
                             }
                         }
                         _a.label = 3;

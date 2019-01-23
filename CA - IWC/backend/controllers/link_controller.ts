@@ -2,7 +2,6 @@ import * as express from "express";
 import { authMiddleware } from "../middleware/auth_middleware";
 import { validateIds, validateNewLink } from "../middleware/validation_middleware";
 import { getLinkRepository } from "../repositories/link_repository";
-import { getCommentRepository } from "../repositories/comment_repository";
 import { getVoteRepository } from "../repositories/vote_repository";
 import { Repository } from "typeorm";
 import { Link } from "../entities/link";
@@ -11,7 +10,6 @@ export function getLinkController() {
 
     // Prepare repositories
     const linkRepository = getLinkRepository();
-    const commentRepository = getCommentRepository();
     const voteRepository = getVoteRepository();
 
     // Create router instance so we can declare endpoints
@@ -29,7 +27,7 @@ export function getLinkController() {
                     .json(links);
             } else {
                 res.status(404)
-                    .json({ message: "No links found" });
+                    .send({ message: "No links found" });
             }
         })();
     });
@@ -50,7 +48,7 @@ export function getLinkController() {
                     .json(linkData);
             } else {
                 res.status(404)
-                    .json({ message: `Link id ${ linkId } not found` });
+                    .send({ message: `Link id ${ linkId } not found` });
             }
         })();
     });
@@ -66,15 +64,14 @@ export function getLinkController() {
             // If data is valid save new Link
             if (validLink) {
                 const linkData = await linkRepository.save(newLink);
-                res.status(200)
+                res.status(201)
                     .json({
                         message: "Link posted",
                         data: linkData
-                    })
-                    .send();
+                    });
             } else {
                 res.status(400)
-                    .json({ message: "Invalid entries." });
+                    .send({ message: "Invalid entries." });
             }
         })();
     });
@@ -94,14 +91,14 @@ export function getLinkController() {
                 // delete user data from object
                 delete linkToRemove.user;
                 const deletedContent = await linkRepository.remove(linkToRemove);
-                res.status(200)
+                res.status(201)
                     .json({
                         message: "Link deleted",
                         data: deletedContent
                     });
             } else {
-                res.status(401)
-                    .json({ message: `User id ${ userId } can't delete this link` });
+                res.status(403)
+                    .send({ message: `User id ${ userId } can't delete this link` });
             }
         })();
     });
@@ -121,7 +118,7 @@ export function getLinkController() {
             // If voteToCast exists call the repository and send response
             if (voteToCast) {
                 const voteData = await voteRepository.save(voteToCast);
-                res.status(200)
+                res.status(201)
                     .json({
                         message: "Vote casted",
                         data: voteData
@@ -147,7 +144,7 @@ export function getLinkController() {
                 // Default value is true so this needs to be reset to false on downvote
                 voteToCast.value = false
                 const voteData = await voteRepository.save(voteToCast);
-                res.status(200)
+                res.status(201)
                     .json({
                         message: "Vote casted",
                         data: voteData
@@ -173,8 +170,7 @@ async function linkChecker(linkId: number, res: any) {
     } else {
         // When link not found
         res.status(404)
-            .json({ message: `Link ID ${ linkId } not found.` })
-            .send();
+            .send({ message: `Link ID ${ linkId } not found.` });
     }
 }
 
@@ -192,8 +188,7 @@ async function voteChecker(linkId: any, userId: any, res: any) {
             .json({
                 message: "User already has casted a vote.",
                 data: voteExists
-            })
-            .send();
+            });
 
     } else {
         // Set new vote entity, default value is true, downvote route needs to be change to false
