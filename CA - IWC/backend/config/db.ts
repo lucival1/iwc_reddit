@@ -6,7 +6,7 @@ import { Vote } from "../entities/vote";
 
 export async function createDbConnection() {
 
-    // Read the database settings from the environment vairables
+    // Read the database settings from the environment variables
     const DATABASE_HOST = process.env.DATABASE_HOST;
     const DATABASE_PASSWORD = process.env.DATABASE_PASSWORD;
     const DATABASE_USER = process.env.DATABASE_USER;
