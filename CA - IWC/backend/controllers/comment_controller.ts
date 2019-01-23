@@ -6,7 +6,10 @@ import { getLinkRepository } from "../repositories/link_repository";
 
 export function getCommentController() {
 
+    // Prepare repositories
     const commentRepository = getCommentRepository();
+
+    // Create router instance so we can declare endpoints
     const router = express.Router();
 
     // HTTP POST http://localhost:8080/api/v1/comments
@@ -23,15 +26,15 @@ export function getCommentController() {
                 // If link exists create new comment and send response
                 if(linkData) {
                     const commentData = await commentRepository.save(newComment);
-                    res.json({
-                        message: "Comment created",
-                        data: commentData
-                    })
-                    .send();
+                    res.status(201)
+                        .json({
+                            message: "Comment created",
+                            data: commentData
+                        });
                 }
             } else {
                 res.status(400)
-                    .json({ message: "Invalid entries." });
+                    .send({ message: "Invalid entries." });
             }
         })();
     });
@@ -53,14 +56,14 @@ export function getCommentController() {
                 // set new comment value
                 commentToUpdate.value = newComment;
                 const commentData = await commentRepository.save(commentToUpdate);
-                res.json({
-                    message: "Comment updated",
-                    data: commentData
-                })
-                .send();
+                res.status(200)
+                    .json({
+                        message: "Comment updated",
+                        data: commentData
+                    });
             } else {
-                res.status(400)
-                    .json({ message: `User id ${ userId } can't update this comment` });
+                res.status(403)
+                    .send({ message: `User id ${ userId } can't update this comment` });
             }
         })();
     });
@@ -85,8 +88,8 @@ export function getCommentController() {
                         data: deletedContent
                     });
             } else {
-                res.status(400)
-                    .json({ message: `User id ${ userId } can't delete this comment` });
+                res.status(403)
+                    .send({ message: `User id ${ userId } can't delete this comment` });
             }
         })();
     });
@@ -106,8 +109,7 @@ async function linkChecker(linkId: number, res: any) {
     } else {
         // When link not found
         res.status(404)
-            .json({ message: `Link ID ${ linkId } not found.` })
-            .send();
+            .send({ message: `Link ID ${ linkId } not found.` });
     }
 }
 
@@ -123,7 +125,6 @@ async function commentChecker(commentId: any, res: any) {
     } else {
         // When link not found
         res.status(404)
-            .json({ message: `Comment ID ${ commentId } not found.` })
-            .send();
+            .send({ message: `Comment ID ${ commentId } not found.` });
     }
 }
