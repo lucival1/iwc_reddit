@@ -23,34 +23,26 @@ export function authMiddleware(
     const token = req.headers["x-auth-token"];
     // Client error if no token found in request headers
     if (typeof token !== "string") {
-        res.status(400).send();
+        res.status(400)
+            .send({ message: 'No valid token found' });
     } else {
-        // Server error is enironment variable is not set
+        // Server error is environment variable is not set
         if (AUTH_SECRET === undefined) {
-            res.status(500).send();
+            res.status(500)
+                .send({ message: 'Internal Server error' });
         } else {
             try {
                 // Check that the token is valid
                 const obj = jwt.verify(token, AUTH_SECRET) as any;
                 // Add the user ID to the HTTP request object so we can access it from the NEXT request handler
-                // console.log('obj', obj);
                 (req as any).body.user = obj.id;
                 // Invoke NEXT request handler
                 next();
             } catch(err) {
                 // Unauthorized if token cannot be verified
-                res.status(401).send();
+                res.status(401)
+                    .send({ message: 'Unauthorized Access' });
             }
         }
     }
-}
-
-
-// TO DO
-export function validateMiddleware(
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
-) {
-
 }
