@@ -52,7 +52,7 @@ var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 function getAuthController() {
     var _this = this;
     // AUTH_SECRET must come from the environment variables
-    var AUTH_SECRET = "123"; //process.env.AUTH_SECRET;
+    var AUTH_SECRET = process.env.AUTH_SECRET;
     // Prepare repositories
     var userRepository = user_repository_1.getUserRepository();
     // Create router instance so we can declare endpoints
