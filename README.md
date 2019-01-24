@@ -1,4 +1,4 @@
-This project is a college assignment where I needed to create a API to simulate Reddit.
+This API has the structure to simulate Reddit forums.
 In order to run this project a .env file must be created at the ROOT directory with the following variables:
 
 DATABASE_USER='DB user'
