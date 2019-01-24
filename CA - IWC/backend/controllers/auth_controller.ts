@@ -22,7 +22,6 @@ export function getAuthController() {
     // HTTP POST http://localhost:8080//api/v1/auth/login/
     router.post("/login", (req, res) => {
         (async () => {
-            console.log('auth', req.body);
             const userDetails = req.body;
             const result = joi.validate(userDetails, userDetailsSchema);
             if (result.error) {
