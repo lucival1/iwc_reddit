@@ -9,6 +9,8 @@ import { getUserController } from "../controllers/user_controller";
 
 export async function getApp(useFakeDabe = false) {
 
+    // load environment variable from .env file
+    require('dotenv').config();
     // Create db connection
     await createDbConnection();
 

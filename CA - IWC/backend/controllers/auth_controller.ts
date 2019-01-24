@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 export function getAuthController() {
 
     // AUTH_SECRET must come from the environment variables
-    const AUTH_SECRET = "123";//process.env.AUTH_SECRET;
+    const AUTH_SECRET = process.env.AUTH_SECRET;
 
     // Prepare repositories
     const userRepository = getUserRepository();
